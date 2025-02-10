@@ -1,0 +1,46 @@
+{
+  "name": "transak-email-verify",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "cra-template": "1.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^4.2.4",
+    "axios": "^1.7.9",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "chai": "^4.4.3",
+    "jest": "^29.7.0",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "mocha": "^11.1.0",
+    "prettier": "^3.4.2",
+    "readline-sync": "^1.4.10",
+    "supertest": "^7.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "api-sequence-test": "mocha 'src/apiSequenceTest/**/*.test.js' --timeout 10000 --recursive"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
