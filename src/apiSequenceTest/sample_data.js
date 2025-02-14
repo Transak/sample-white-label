@@ -1,8 +1,8 @@
 export const sampleData = {
   "env":{
-    "PARTNER_API_KEY": "a2374be4-c59a-400e-809b-72c226c74b8f",
+    "PARTNER_API_KEY": "a9d9cc56-a524-4dd7-8008-59f36bd6fa97",
     "ACCESS_TOKEN": "",
-    "EMAIL": "shashank+822339999919273@transak.com",
+    "EMAIL": "shashank+7222339273@transak.com",
     "OTP_CODE": "3651",
     "ENVIRONMENT": "staging",
     "frontend-auth": "9TRUtEM_RLns4Tp7h34wtvA2h*yc2ty2EhChtWtAdRko!EpVrpvH26xf_YJPM_qqiEG4LsL7TJiB6wg79BjtLGHdaKu6gHsceDHQ",
@@ -21,7 +21,7 @@ export const sampleData = {
     "cryptoCurrency": "USDC",
     "paymentMethod": "sepa_bank_transfer",
     "isBuyOrSell": "BUY",
-    "fiatAmount": 30,
+    "fiatAmount": 1000,
     "partnerApiKey": "string",
     "network": "arbitrum",
     "quoteCountryCode": "FR"

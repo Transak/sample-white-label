@@ -133,7 +133,7 @@ async function waitForKYCApproval(transak) {
     console.log('📌 **KYC forms length:**', kycFormsRes?.forms?.length);
 
     const user = await transak.user.getUser();
-    if (user.kyc?.l1?.status !== 'APPROVED') {
+    if (user.kyc?.l1?.status === 'APPROVED') {
       console.log('✅ KYC Approved!');
       return 'APPROVED';
     }

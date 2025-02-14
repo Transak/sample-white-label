@@ -1,14 +1,16 @@
 import { TransakAPI } from './../lib/index.js';
 
-const transak = new TransakAPI({
-  environment: 'staging',
-  partnerApiKey: 'a2374be4-c59a-400e-809b-72c226c74b8f',
-});
+
 
 import { handleKYCVerificationViaApi } from './kycUtil/index.js';
 import { orderApiSequenceTests } from './orderUtil/index.js';
 import { sampleData } from './sample_data.js';
 import { executeApiTest } from './utils/index.js';
+
+const transak = new TransakAPI({
+  environment: sampleData.env.ENVIRONMENT,
+  partnerApiKey: sampleData.env.PARTNER_API_KEY,
+});
 
 let accessToken = sampleData.env.ACCESS_TOKEN || null; // Store accessToken
 const frontendAuth = sampleData.env['frontend-auth'];
