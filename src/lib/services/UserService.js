@@ -102,6 +102,14 @@ class UserService {
       throw new Error('Failed to submit purpose of usage form.');
     return response;
   }
+
+  async shareTokenStatus(params) {
+    return this.client.request({
+      endpointId: 'share_token_status',
+      data: null,
+      params
+    });
+  }
 }
 
 function transformGetKYCForms(input) {
