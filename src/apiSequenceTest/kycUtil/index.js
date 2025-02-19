@@ -9,7 +9,20 @@ async function kycApiSequenceTests(transak) {
   console.log('🔄 Starting KYC API Sequence Tests...');
 
   // ✅ Fetch Quote
-  const quoteData = await transak.public.getQuote(sampleData.quoteFields);
+  const quoteData = await transak.public.getQuote(
+    {
+      ...sampleData.quoteFields, 
+      ...(
+        sampleData.env.IS_KYC_THOUGH_RELIANCE === true ? 
+        { 
+          kycShareToken: sampleData.kycRelianceDetails.kycShareToken, 
+          kycShareTokenProvider: sampleData.kycRelianceDetails.kycShareTokenProvider,
+          partnerApiKey: transak.client.config.partnerApiKey 
+        } :
+        {}
+      ) 
+    }
+  );
   if (quoteData && quoteData.quoteId) quoteId = quoteData.quoteId;
   console.log(`✅ Quote fetched: ${quoteId}`);
 
@@ -24,16 +37,26 @@ async function kycApiSequenceTests(transak) {
  * ✅ Fetches KYC Forms and Submits Data Dynamically
  */
 async function fetchAndSubmitKYCForms(transak, quoteId) {
-  const kycForms = await transak.user.getKycForms({ quoteId });
+  let kycForms = await transak.user.getKycForms({ quoteId });
   console.log("*******", kycForms);
 
   console.log(`✅ KYC forms fetched.`);
+  
+  const hasKycRelianceWaitForm = kycForms.forms.some(form => form.id === "kycReliance");
+  if (hasKycRelianceWaitForm) {
+    await waitForkycShareTokenToReachTerminalState(transak, sampleData.kycRelianceDetails.kycShareToken, sampleData.kycRelianceDetails.kycShareTokenProvider, quoteId)
+    
+    // Get a fresh list of KYC forms to check if any remaining data needs to be submitted, which we were not able to get from the KYC Share Token
+    console.log(`✅ Check after the KYC Share Token is processed if any form needs to be submitted.`);
+    kycForms = await transak.user.getKycForms({ quoteId });
+    console.log("New list of KYC forms needs to be submitted", kycForms);
+  }
 
   const hasPurposeOfUsage = kycForms.forms.some(form => form.id === "purposeOfUsage");
   const hasIdProof = kycForms.forms.some(form => form.id === "idProof");
 
   // ✅ Filter out `purposeOfUsage` and `idProof`
-  const filteredForms = kycForms.forms.filter(form => !["purposeOfUsage", "idProof"].includes(form.id));
+  const filteredForms = kycForms.forms.filter(form => !["purposeOfUsage", "idProof", "kycReliance"].includes(form.id));
   await submitKYCForms({ transak, quoteId, forms: filteredForms });
 
   if (hasPurposeOfUsage) await submitPurposeOfUsageForm(transak);
@@ -124,11 +147,11 @@ async function handleKYCVerificationViaApi(transak) {
  * ✅ Polls `GET /api/v2/user` every 30 seconds until KYC is approved
  */
 async function waitForKYCApproval(transak) {
-  const maxRetries = 20; // 10 minutes max wait time
+  const maxRetries = 20; // 20 retries max
   let retries = 0;
 
   while (retries < maxRetries) {
-    await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 30 seconds
+    await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
     const kycFormsRes = await transak.user.getKycForms({ quoteId });
     console.log('📌 **KYC forms length:**', kycFormsRes?.forms?.length);
 
@@ -147,8 +170,33 @@ async function waitForKYCApproval(transak) {
   console.warn('⚠️ KYC approval timeout reached.');
 }
 
+/**
+ * ✅ Polls `GET /api/v2/user/shareTokenStatus` every 10 seconds until KYC is approved
+ */
+async function waitForkycShareTokenToReachTerminalState(transak, kycShareToken, kycShareTokenProvider, quoteId) {
+  const maxRetries = 20; // 20 retries max
+  let retries = 0;
+
+  while (retries < maxRetries) {
+    await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
+
+    const {shareTokenStatus} = await transak.user.shareTokenStatus({kycShareToken, kycShareTokenProvider, quoteId});
+    if (shareTokenStatus === 'DONE' || shareTokenStatus === 'FAILED') {
+      console.log(`✅ KYC Share Token Processing complete. Share Token Status: ${shareTokenStatus}`);
+      return shareTokenStatus;
+    } 
+
+    console.log(
+      `🔄 KYC Share Token processing (Current Status: ${shareTokenStatus})... Retrying (${retries + 1}/${maxRetries})`
+    );
+    retries++;
+  }
+
+  console.warn('⚠️ KYC share token processing time limit reached.');
+}
+
 // ✅ Export KYC Functions
 export {
   kycApiSequenceTests,
-  handleKYCVerificationViaApi,
+  handleKYCVerificationViaApi
 };

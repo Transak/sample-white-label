@@ -440,6 +440,27 @@ const apiSpecs = {
     response_optional_fields: {},
     output_fields: {},
   },
+  share_token_status: {
+    name: 'Share Token Status',
+    id: 'share_token_status',
+    url: '/api/v2/user/share-token-status',
+    method: 'GET',
+    headers: {
+      'x-trace-id': 'string',
+      authorization: 'string',
+      'content-type': 'application/json',
+    },
+    query_params: {
+      kycShareToken: { type: 'string', isRequired: 'true', value: '' },
+      kycShareTokenProvider: { type: 'string', isRequired: 'false', value: '' },
+      quoteId: { type: 'string', isRequired: 'true', value: '' },
+    },
+    expected_status: 200,
+    response_root_field_name: 'response',
+    response_required_fields: {},
+    response_optional_fields: {},
+    output_fields: {},
+  }
 };
 
 //default export module nodejs

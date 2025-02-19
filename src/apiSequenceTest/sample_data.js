@@ -8,7 +8,12 @@ export const sampleData = {
     "frontend-auth": "9TRUtEM_RLns4Tp7h34wtvA2h*yc2ty2EhChtWtAdRko!EpVrpvH26xf_YJPM_qqiEG4LsL7TJiB6wg79BjtLGHdaKu6gHsceDHQ",
     "WIDGET_DOMAIN_STAGING": "https://global-stg.transak.com",
     "WIDGET_DOMAIN_PRODUCTION": "https://global.transak.com",
-    "WIDGET_DOMAIN": ""
+    "WIDGET_DOMAIN": "",
+    "IS_KYC_THOUGH_RELIANCE": true,
+  },
+  "kycRelianceDetails":{ // This details needs to be filled if IS_KYC_THOUGH_RELIANCE is set as True 
+    "kycShareToken": "_act-sbx-jwt-eyJhbGciOiJub25lIn0.eyJqdGkiOiJfYWN0LXNieC1lYWU2ZDY0NC1lZmZkLTQ0YTMtYWFmYi00OWYwOWEwNDc4ZWEiLCJ1cmwiOiJodHRwczovL2FwaS5zdW1zdWIuY29tIn0.",
+    "kycShareTokenProvider": "SUMSUB",
   },
   "personalDetails": {
     "firstName": "John",
