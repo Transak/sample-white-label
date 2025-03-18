@@ -1,7 +1,5 @@
+import readlineSync from 'readline-sync';
 import { TransakAPI } from './../lib/index.js';
-
-
-
 import { handleKYCVerificationViaApi } from './kycUtil/index.js';
 import { orderApiSequenceTests } from './orderUtil/index.js';
 import { sampleData } from './sample_data.js';
