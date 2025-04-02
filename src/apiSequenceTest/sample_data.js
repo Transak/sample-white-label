@@ -24,7 +24,7 @@ export const sampleData = {
   "quoteFields": {
     "fiatCurrency": "EUR",
     "cryptoCurrency": "USDC",
-    "paymentMethod": "sepa_bank_transfer",
+    "paymentMethod": "credit_debit_card",
     "isBuyOrSell": "BUY",
     "fiatAmount": 1000,
     "partnerApiKey": "string",

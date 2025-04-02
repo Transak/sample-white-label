@@ -14,6 +14,16 @@ class UserService {
     });
   }
 
+  async requestOtt({ accessToken }) {
+    if (!accessToken) throw new Error('Access Token is required');
+    return this.client.request({
+      endpointId: 'request_ott',
+      data: { partnerApiKey: this.partnerApiKey },
+      params: {},
+      headers: { 'Authorization': accessToken },
+    });
+  }
+
   async verifyEmailOtp(data) {
     const response = await this.client.request({
       endpointId: 'verify_email_otp',
