@@ -230,13 +230,10 @@ async function waitForCardPaymentOrderCompletion(transak, partnerOrderId) {
   let channel = pusher.subscribe(channelName);
 
   //receive updates of all the events
+  console.log(`Listening to all events of ${channelName} ......`)
   channel.bind_global((eventId, orderData) => {
-    console.log(`Listening to ${eventId}`)
-    if( eventId === 'ORDER_CREATED' ) {
-      console.log(`Order Created ${partnerOrderId}`)
-    }
-    if( eventId === 'ORDER_COMPLETED' ) {
-      console.log(`ORDER_COMPLETED ${partnerOrderId}`)
+    if(eventId !== 'pusher:subscription_succeeded') {
+      console.log(`Order is in ${eventId} state ${orderData.id}`)
     }
   });
 }
