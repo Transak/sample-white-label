@@ -460,7 +460,30 @@ const apiSpecs = {
     response_required_fields: {},
     response_optional_fields: {},
     output_fields: {},
-  }
+  },
+  request_ott: {
+    name: 'Request OTT',
+    id: 'request_ott',
+    url: '/auth/public/v1/request-ott',
+    method: 'POST',
+    headers: {
+      'x-trace-id': 'string',
+      'Authorization': 'string',
+      'Content-Type': 'application/json',
+    },
+    body: {
+      partnerApiKey: { type: 'string', isRequired: 'true', value: '' },
+    },
+    expected_status: 200,
+    response_root_field_name: 'response',
+    response_required_fields: {
+      token: 'string',
+    },
+    response_optional_fields: {},
+    output_fields: {
+      token: { source: 'token', type: 'string', isRequired: true },
+    },
+  },
 };
 
 //default export module nodejs

@@ -93,6 +93,29 @@ describe('Authentication API Tests', function () {
       throw new Error(
         '❌ Access Token is missing. Run email verification apiSequenceTest first.'
       );
-    await orderApiSequenceTests(transak);
+
+    if(sampleData.quoteFields.paymentMethod === 'credit_debit_card') {
+      // Request an OTT using the access token
+      console.log('Requesting OTT...');
+      const ottResponse = await transak.user.requestOtt({ accessToken: `Bearer ${transak.client.accessToken}` });
+      console.log('✅ OTT retrieved successfully.');
+
+      const cardPaymentUrl = `https://${sampleData.env.ENVIRONMENT === 'staging' ? 'global-stg' : 'global'}.transak.com?` +
+        `ott=${ottResponse.token}&` +
+        `apiKey=${sampleData.env.PARTNER_API_KEY}&` +
+        `fiatCurrency=${sampleData.quoteFields.fiatCurrency}&` +
+        `cryptoCurrencyCode=${sampleData.quoteFields.cryptoCurrency}&` +
+        `productsAvailed=${sampleData.quoteFields.isBuyOrSell}&` +
+        `fiatAmount=${sampleData.quoteFields.fiatAmount}&` +
+        `network=${sampleData.quoteFields.network}&` +
+        `paymentMethod=${sampleData.quoteFields.paymentMethod}&` +
+        `hideExchangeScreen=true&` +
+        `walletAddress=${sampleData.walletAddress}&` +
+        `disableWalletAddressForm=true`;
+
+      console.log(`Complete card payment order using the following link: ${cardPaymentUrl}`);
+    } else {
+      await orderApiSequenceTests(transak);
+    }
   });
 });
