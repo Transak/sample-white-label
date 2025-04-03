@@ -1,5 +1,13 @@
 import { kycApiSequenceTests } from '../kycUtil/index.js'; // ✅ Import KYC API sequence
 import { sampleData } from '../sample_data.js'; // ✅ Load Sample Data
+import Pusher from 'pusher-js';
+/**
+ * ✅ Generates a random ID for partner order tracking
+ */
+function generateRandomId() {
+  return Math.random().toString(36).substring(2, 15) + 
+         Math.random().toString(36).substring(2, 15);
+}
 
 let quoteId, orderId, formData;
 
@@ -31,7 +39,11 @@ async function orderApiSequenceTests(transak) {
   });
 
   // ✅ Create Order
-  orderId = await createOrder(transak, quoteId);
+  if(sampleData.quoteFields.paymentMethod === 'credit_debit_card' || sampleData.quoteFields.paymentMethod === 'apple_pay' || sampleData.quoteFields.paymentMethod === 'google_pay') {
+    orderId = await createCardPaymentOrder(transak, quoteId);
+  } else {
+    orderId = await createBankTransferOrder(transak, quoteId);
+  }
 
   // ✅ Confirm Payment
   await confirmPayment(transak, orderId);
@@ -88,9 +100,64 @@ async function checkOrderLimits(transak) {
 }
 
 /**
+ * ✅ Generates a card payment URL with the given parameters
+ */
+function generateCardPaymentUrl({
+  ott,
+  apiKey,
+  environment,
+  fiatCurrency,
+  cryptoCurrency,
+  isBuyOrSell,
+  fiatAmount,
+  network,
+  paymentMethod,
+  walletAddress,
+  partnerOrderId
+}) {
+  return `https://${environment === 'staging' ? 'global-stg' : 'global'}.transak.com?` +
+    `ott=${ott}&` +
+    `apiKey=${apiKey}&` +
+    `fiatCurrency=${fiatCurrency}&` +
+    `cryptoCurrencyCode=${cryptoCurrency}&` +
+    `productsAvailed=${isBuyOrSell}&` +
+    `fiatAmount=${fiatAmount}&` +
+    `network=${network}&` +
+    `paymentMethod=${paymentMethod}&` +
+    `hideExchangeScreen=true&` +
+    `walletAddress=${walletAddress}&` +
+    `partnerOrderId=${partnerOrderId}&` +
+    `disableWalletAddressForm=true`;
+}
+
+/**
  * ✅ Creates Order Using `walletReserveId`
  */
-async function createOrder(transak, quoteId) {
+async function createCardPaymentOrder(transak) {
+  console.log('Requesting OTT...');
+  const ottResponse = await transak.user.requestOtt({ accessToken: `Bearer ${transak.client.accessToken}` });
+  console.log('✅ OTT retrieved successfully.');
+  
+  const partnerOrderId = generateRandomId();
+  const cardPaymentUrl = generateCardPaymentUrl({
+    ott: ottResponse.token,
+    apiKey: sampleData.env.PARTNER_API_KEY,
+    environment: sampleData.env.ENVIRONMENT,
+    fiatCurrency: sampleData.quoteFields.fiatCurrency,
+    cryptoCurrency: sampleData.quoteFields.cryptoCurrency,
+    isBuyOrSell: sampleData.quoteFields.isBuyOrSell,
+    fiatAmount: sampleData.quoteFields.fiatAmount,
+    network: sampleData.quoteFields.network,
+    paymentMethod: sampleData.quoteFields.paymentMethod,
+    walletAddress: sampleData.walletAddress,
+    partnerOrderId
+  });
+
+  console.log(`Complete card payment order using the following link: ${cardPaymentUrl}`);
+  return partnerOrderId;
+}
+
+async function createBankTransferOrder(transak, quoteId) {
   console.log('🔄 Creating Order...');
 
   const orderData = await transak.order.createOrder({ quoteId });
@@ -126,12 +193,16 @@ async function createOrder(transak, quoteId) {
  * ✅ Confirms Payment for Order
  */
 async function confirmPayment(transak, orderId) {
-  console.log('🔄 Confirming Payment...');
-  const res = await transak.order.confirmPayment({
-    orderId,
-    paymentMethod: sampleData.quoteFields.paymentMethod,
-  });
-  console.log('✅ Payment Confirmed.');
+  if(sampleData.quoteFields.paymentMethod === 'credit_debit_card' || sampleData.quoteFields.paymentMethod === 'apple_pay' || sampleData.quoteFields.paymentMethod === 'google_pay') {
+    console.log('🔄 Payment Marked as Paid not required for this payment method.');
+  } else {
+    console.log('🔄 Confirming Payment...');
+    const res = await transak.order.confirmPayment({
+      orderId,
+      paymentMethod: sampleData.quoteFields.paymentMethod,
+    });
+    console.log('✅ Payment Marked as Paid.');
+  }
 }
 
 async function getOrderById(transak, orderId, isSkipTest) {
@@ -144,6 +215,32 @@ async function getOrderById(transak, orderId, isSkipTest) {
  * ✅ Polls `GET /api/v2/orders/{orderId}` Every 30 Seconds Until Order is Completed
  */
 async function waitForOrderCompletion(transak, orderId) {
+  if(sampleData.quoteFields.paymentMethod === 'credit_debit_card' || sampleData.quoteFields.paymentMethod === 'apple_pay' || sampleData.quoteFields.paymentMethod === 'google_pay') {
+    await waitForCardPaymentOrderCompletion(transak, orderId);
+  }else{
+    await waitForBankTransferOrderCompletion(transak, orderId);
+  }
+}
+
+async function waitForCardPaymentOrderCompletion(transak, partnerOrderId) {
+  // implement Transak pusher logic here  
+  
+  let pusher = new Pusher('1d9ffac87de599c61283', {cluster: 'ap2'});
+  let channelName = `${transak.client.config.partnerApiKey }_${partnerOrderId}`
+  let channel = pusher.subscribe(channelName);
+
+  //receive updates of all the events
+  channel.bind_global((eventId, orderData) => {
+    console.log(`Listening to ${eventId}`)
+    if( eventId === 'ORDER_CREATED' ) {
+      console.log(`Order Created ${partnerOrderId}`)
+    }
+    if( eventId === 'ORDER_COMPLETED' ) {
+      console.log(`ORDER_COMPLETED ${partnerOrderId}`)
+    }
+  });
+}
+async function waitForBankTransferOrderCompletion(transak, orderId) {
   const maxRetries = 20; // 10 minutes max wait time
   let retries = 0;
 
