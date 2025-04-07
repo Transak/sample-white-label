@@ -14,13 +14,12 @@ class UserService {
     });
   }
 
-  async requestOtt({ accessToken }) {
-    if (!accessToken) throw new Error('Access Token is required');
+  async requestOtt() {
     return this.client.request({
       endpointId: 'request_ott',
       data: { partnerApiKey: this.partnerApiKey },
       params: {},
-      headers: { 'Authorization': accessToken },
+      headers: { 'Authorization': `Bearer ${this.client.accessToken}` },
     });
   }
 

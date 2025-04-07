@@ -484,6 +484,8 @@ const res = await transak.order.walletReserve({
 
 ### Create Order
 
+#### 1. Bank Transfer Flow
+
 `createOrder` is an **authenticated API call** that allows you to **create an order** based on the reserved **wallet address** and the **quote ID** obtained from `walletReserve()`.
 
 After successfully reserving a wallet, you need to pass the **quoteId** in this API call. Based on the provided quote, the order will be generated, and you will receive the **order details** in the response.
@@ -536,9 +538,54 @@ After successfully reserving a wallet, you need to pass the **quoteId** in this 
 }
 ```
 
+#### 2. Card, Apple Pay Flow
+
+The Card, Apple Pay flow enables users to purchase cryptocurrency using existing or new card details, including Apple Pay. This flow uses an OTT (One-Time Token) to initialize a payment widget, enabling a seamless, embedded experience within your application.
+
+##### Step 1: Get an OTT (One-Time Token)
+
+First, retrieve a one-time token from the Transak SDK. This token will be used to securely authenticate the payment widget:
+
+```jsx
+// Or using the SDK
+const ottResponse = await transak.user.requestOtt();
+
+// Extract the token from the response
+const ottToken = ottResponse.token;
+```
+
+> **Token Characteristics:**
+> - One-time use only (token becomes invalid after first use)
+> - 5-minute expiry (token must be used within 5 minutes of generation)
+
+##### Step 2: Generate the Widget URL
+
+With the OTT token, you can now construct a widget URL with the necessary parameters:
+
+```jsx
+const widgetUrl = `https://global-stg.transak.com?ott=${ottToken}&apiKey=YOUR_API_KEY&fiatCurrency=EUR&cryptoCurrencyCode=USDC&productsAvailed=BUY&fiatAmount=1000&network=arbitrum&paymentMethod=credit_debit_card&hideExchangeScreen=true&walletAddress=0x3D629A50ec20eb9a2ed23D0fd0EB28DdcA9Fda46&disableWalletAddressForm=true`;
+```
+
+Required URL parameters:
+- `ott`: Your one-time token
+- `apiKey`: Your partner API key
+- `fiatCurrency`: Currency code (e.g., EUR, USD)
+- `cryptoCurrencyCode`: Cryptocurrency symbol (e.g., USDC, ETH)
+- `productsAvailed`: Transaction type (BUY)
+- `fiatAmount`: Amount in fiat currency
+- `network`: Blockchain network (e.g., arbitrum, ethereum)
+- `paymentMethod`: Payment method (credit_debit_card, apple_pay)
+- `hideExchangeScreen`: Hide exchange rate screen
+- `walletAddress`: User's wallet address
+- `disableWalletAddressForm`: Hide wallet address screen
+
+The widget handles all aspects of the payment process, including card entry, Apple Pay validation, and transaction completion. Transak manages all the underlying payment processing and cryptocurrency delivery while maintaining full security and compliance with payment processing regulations.
+
 ### **Confirm Payment - Notify System of User Payment**
 
 `confirmPayment` is an **authenticated API call** that allows you to **manually notify Transak that the user has completed the payment**. This step helps improve **conversion rates** and ensures that our system **processes the order efficiently**.
+
+> Note: This step is only required for bank transfer payments and is NOT needed for card payments or Apple Pay transactions, which are automatically confirmed by the payment system.
 
 After the user has initiated the payment, you need to call this API with:
 

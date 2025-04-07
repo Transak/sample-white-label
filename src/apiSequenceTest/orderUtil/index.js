@@ -136,7 +136,7 @@ function generateCardPaymentUrl({
  */
 async function createSemiWidgetPaymentUrl(transak) {
   console.log('Requesting OTT...');
-  const ottResponse = await transak.user.requestOtt({ accessToken: `Bearer ${transak.client.accessToken}` });
+  const ottResponse = await transak.user.requestOtt();
   console.log('✅ OTT retrieved successfully.');
   
   const partnerOrderId = generateRandomId();
