@@ -187,7 +187,7 @@ Thus, `getQuote` plays a **vital role** in the **entire order flow**, from **KYC
   "conversionPrice": "number", // Exchange rate at the time of the quote
   "fiatCurrency": "string", // Fiat currency used in the quote (e.g., EUR, USD)
   "cryptoCurrency": "string", // Cryptocurrency involved in the quote (e.g., USDC, BTC)
-  "paymentMethod": "string", // Payment method used (e.g., sepa_bank_transfer, credit_debit_card, apple_pay, google_pay)
+  "paymentMethod": "string", // Payment method used (e.g., sepa_bank_transfer, credit_debit_card, apple_pay, google_pay, pm_ach_push, pm_wire)
   "fiatAmount": "number", // Fiat amount specified in the quote
   "cryptoAmount": "number", // Equivalent cryptocurrency amount
   "isBuyOrSell": "string", // Type of transaction (BUY or SELL)
@@ -574,7 +574,7 @@ Required URL parameters:
 - `productsAvailed`: Transaction type (BUY)
 - `fiatAmount`: Amount in fiat currency
 - `network`: Blockchain network (e.g., arbitrum, ethereum)
-- `paymentMethod`: Payment method (credit_debit_card, apple_pay)
+- `paymentMethod`: Payment method (credit_debit_card, apple_pay, google_pay)
 - `hideExchangeScreen`: Hide exchange rate screen
 - `walletAddress`: User's wallet address
 - `disableWalletAddressForm`: Hide wallet address screen
