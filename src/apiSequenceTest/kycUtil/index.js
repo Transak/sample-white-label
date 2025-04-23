@@ -66,7 +66,10 @@ async function fetchAndSubmitKYCForms(transak, quoteId) {
  * ✅ Validates KYC Forms But Does NOT Submit `purposeOfUsage` or `idProof`
  */
 async function submitKYCForms({ transak, forms, quoteId }) {
-  for (const form of forms) {
+  let index = 0;
+  
+  while (index < forms.length) {
+    const form = forms[index];
     const formId = form.id;
     console.log(`🔄 Fetching fields for KYC form: ${formId}`);
 
@@ -78,7 +81,12 @@ async function submitKYCForms({ transak, forms, quoteId }) {
       throw new Error(`❌ Missing required KYC data for form: ${formId}`);
     }
 
-    const formDataToSubmit = sampleData[formId];
+    let formDataToSubmit;
+    if (formId === 'usSSN') {
+      formDataToSubmit = sampleData.usSSN();
+    } else {
+      formDataToSubmit = sampleData[formId];
+    }
     formFields.forEach((field) => {
       if (!(field in formDataToSubmit)) {
         throw new Error(
@@ -89,12 +97,33 @@ async function submitKYCForms({ transak, forms, quoteId }) {
 
     console.log(`📤 Submitting ${formId}:`, formDataToSubmit);
 
-    // ✅ Submit the KYC form
-    const patchUserResponse = await transak.user.patchUser(formDataToSubmit);
+    let patchUserResponse;
+    if (formId === 'usSSN') {
+      // ✅ Submit US SSN
+      patchUserResponse = await transak.user.verifySSN(formDataToSubmit);
+    } else {
+      // ✅ Submit Personal and Address details
+      patchUserResponse = await transak.user.patchUser(formDataToSubmit);
+    }
 
     console.log(
       `✅ Successfully submitted KYC form: ${formId} ${patchUserResponse.email}`
     );
+
+    let {forms: newForms} = await transak.user.getKycForms({ quoteId });
+    newForms = newForms.filter(form => !["purposeOfUsage", "idProof", "kycReliance"].includes(form.id));
+    // Compare forms in kycForms with current forms array and add missing forms
+    const currentFormIds = forms.map(form => form.id);
+    newForms = newForms.filter(form => !currentFormIds.includes(form.id));
+    
+    if (newForms.length > 0) {
+      console.log(`🔄 Adding ${newForms.length} new forms that weren't in the original forms array`);
+      forms.push(...newForms);
+      console.log(`📋 Updated forms length: ${forms.length}`);
+    }
+    
+    // Move to the next form
+    index++;
   }
 }
 

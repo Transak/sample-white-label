@@ -43,5 +43,13 @@ export const sampleData = {
   "purposeOfUsage": {
     "purposeList": ["Buying/selling crypto for investments"]
   },
-  "idProof": {}
+  "idProof": {},
+  "usSSN": () => {
+    // Generate a random SSN in the format 000-00-0000
+    const area = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const group = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    const serial = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const ssn = `${area}-${group}-${serial}`;
+    return { ssn }
+  }
 }
