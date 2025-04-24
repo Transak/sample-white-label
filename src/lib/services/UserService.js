@@ -119,6 +119,16 @@ class UserService {
       params
     });
   }
+
+  async verifySSN({ ssn }) {
+    if (!ssn) throw new Error('SSN is required');
+    return this.client.request({
+      endpointId: 'verify_ssn',
+      data: { ssn },
+      params: {},
+      headers: { 'Authorization': `${this.client.accessToken}` },
+    });
+  }
 }
 
 function transformGetKYCForms(input) {

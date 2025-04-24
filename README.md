@@ -262,6 +262,7 @@ The **quote ID** must be passed when calling this API, as it determines the requ
 - **Address Details** → User’s residential details.
 - **Purpose of Usage** → Required for compliance with Transak’s regulations.
 - **ID Proof** → Only required for **Standard KYC**. If the user is under **Simple KYC**, ID proof is not required.
+- **US SSN** -> Required if country selected US (United States of America) in Address Details
 
 As per the **quote ID**, the system dynamically returns the appropriate KYC forms for the user to complete.
 
@@ -295,9 +296,9 @@ const kycForms = await transak.user.getKycForms({ quoteId });
 In this API call, you **pass the form Id** (retrieved from `getKycForms`) and receive a response containing:
 
 - **The list of required fields** → These fields need to be collected from the user.
-- **The endpoint to submit the data** → The response includes the relevant `patchUser` **API endpoint** to submit personal or address details.
+- **The endpoint to submit the data** → The response includes the relevant `patchUser`, `verify-ssn` **API endpoints** to submit personal, address or ssn details.
 
-This API primarily supports fetching **Personal Details** and **Address Details** as part of the **KYC process.** 
+This API primarily supports fetching **Personal Details**, **Address Details** and **US SSN** as part of the **KYC process.** 
 
 ```jsx
 const personalDetailsForm = await transak.user.getKycFormById({ formId: 'personalDetails', quoteId: 'abcd-1234' });
@@ -383,6 +384,31 @@ const PurposeOfUsageFormData = await transak.user.submitPurposeOfUsageForm({
     purposeList: ["Buying/selling crypto for investments"],
   });
 console.log(PurposeOfUsageFormData);
+```
+
+> Response Output Fields:
+> 
+
+```json
+{
+    "result": "ok"
+}
+```
+
+### **Submit SSN**
+`verifySSN` is an **authenticated API call** that is a mandatory step in the **KYC process** when a user selects the **United States of America** as their country in the **Address Details**.
+
+As part of regulatory compliance in the United States, users must provide their **Social Security Number (SSN)** for identity verification. This API allows you to submit the user's SSN securely through the Transak platform.
+
+**How It Works**
+
+- This is a required step for US users **before proceeding with order placement**.
+
+```jsx
+const ssnVerificationResult = await transak.user.verifySSN({
+    ssn: '123-45-6789', // SSN in the format XXX-XX-XXXX or XXXXXXXXX
+});
+console.log(ssnVerificationResult);
 ```
 
 > Response Output Fields:

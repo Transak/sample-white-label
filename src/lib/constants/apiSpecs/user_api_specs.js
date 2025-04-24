@@ -484,6 +484,27 @@ const apiSpecs = {
       token: { source: 'token', type: 'string', isRequired: true },
     },
   },
+  verify_ssn: {
+    name: 'Verify SSN',
+    id: 'verify_ssn',
+    url: '/api/v2/user/verify-ssn',
+    method: 'POST',
+    headers: {
+      'x-trace-id': 'string',
+      'Authorization': 'string',
+      'Content-Type': 'application/json',
+    },
+    body: {
+      ssn: { type: 'string', isRequired: 'true', value: '' },
+    },
+    expected_status: 200,
+    response_root_field_name: 'result',
+    response_required_fields: {
+      result: 'ok',
+    },
+    response_optional_fields: {},
+    output_fields: {},
+  },
 };
 
 //default export module nodejs
