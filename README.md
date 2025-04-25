@@ -627,6 +627,33 @@ After the user has initiated the payment, you need to call this API with:
   });
 ```
 
+### **Cancel Order**
+
+`cancelOrder` is an **authenticated API call** that allows you to **cancel an existing order** that is in a specific status. This API is particularly useful when users need to abort a transaction before it progresses further.
+
+**Order Cancellation Rules:**
+
+- Orders can only be cancelled if they are in the following states:
+  - **AWAITING_PAYMENT_FROM_USER** → Initial state when order is created, waiting for payment
+  - **PAYMENT_DONE_MARKED_BY_USER** → Payment has been marked as completed by user
+
+- Orders in other states cannot be cancelled.
+
+When calling this API, you need to provide:
+
+- **orderId** → The unique identifier of the order to be cancelled.
+- **cancelReason** (optional) → The reason for cancelling the order.
+
+**Example Usage**
+
+```jsx
+const result = await transak.order.cancelOrder({
+  orderId: 'abcd-5678',
+  cancelReason: 'changed_my_mind',
+});
+console.log(result);
+```
+
 ### **Fetch Order Details**
 
 `getOrderById` is an **authenticated API call** that allows you to **fetch the details of a specific order** by passing the **order ID** in the request.
