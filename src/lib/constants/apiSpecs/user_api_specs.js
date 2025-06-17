@@ -1,58 +1,14 @@
 const user_response_fields = {
   required: {
-    id: 'string',
+    partnerUserId: 'string',
     email: 'string',
-    emailVerified: 'boolean',
-    isTncAccepted: 'boolean',
-    lastLogin: {
-      date: 'string',
-      userId: 'string',
-    },
-    createdAt: 'string',
     status: 'string',
     kyc: {
-      l1: {
-        status: 'string',
-        type: ['string', 'null'],
-        highestApprovedKYCType: ['string', 'null'],
-        updatedAt: ['string', 'null'],
-      },
-    },
-    ordersMetadata: {
-      BUY: { numberOfOrders: 'number' },
-      SELL: { numberOfOrders: 'number' },
-      NFT_CHECKOUT: { numberOfOrders: 'number' },
-      TRANSAK_ONE: { numberOfOrders: 'number' },
+      status: 'string',
+      type: ['string', 'null']
     },
   },
   optional: {
-    isOauthLogin: 'boolean',
-    kyc: {
-      l1: {
-        status: 'string',
-        type: ['string', 'null'],
-        highestApprovedKYCType: ['string', 'null'],
-        updatedAt: ['string', 'null'],
-        kycResult: 'string',
-        kycMarkedBy: 'string',
-        kycSubmittedAt: 'string',
-        workflowRunId: 'string',
-        userId: 'string',
-        attempts: 'array',
-        isREReview: 'boolean',
-        isPEPsSanctionsDataExist: 'boolean',
-      },
-      monitor: {
-        started: 'boolean',
-        updatedAt: 'string',
-        fetchCount: 'number',
-        kycFlowType: 'string',
-        partnerName: 'string',
-        partnerApiKey: 'string',
-      },
-    },
-
-    //kyc data
     firstName: 'string',
     lastName: 'string',
     mobileNumber: 'string',
@@ -65,36 +21,12 @@ const user_response_fields = {
       postCode: 'string',
       country: 'string',
       countryCode: 'string',
-    },
-    tncAcceptedAt: 'string',
-    mobileVerified: 'boolean',
-    updatedAt: 'string',
-    sourceOfFunds: {
-      purposeListArray: 'array',
-    },
-
-    billingAddress: {
-      addressLine1: ['string', 'null'],
-      city: ['string', 'null'],
-      postCode: ['string', 'null'],
-      country: ['string', 'null'],
-    },
-    //internal risk info
-    isManualReview: 'boolean',
-    isAllowedToDoKyc: 'boolean',
-    isAllowedToPlaceOrder: 'boolean',
-
-    //other data not that much important
-    banks: 'array',
-    isPANVerified: 'boolean',
-    isSSNVerified: 'boolean',
-    isQualifiedForDWA: 'boolean',
-    isOptedForDWA: 'boolean',
-  },
+    }
+  }
 };
 
 const userOutputFields = {
-  id: { source: 'id', type: 'string', isRequired: true },
+  partnerUserId: { source: 'partnerUserId', type: 'string', isRequired: true },
   firstName: {
     source: 'firstName',
     type: 'string',
@@ -119,7 +51,19 @@ const userOutputFields = {
   kyc: {
     source: 'kyc',
     type: 'object',
-    isRequired: true
+    isRequired: true,
+    nestedFields: {
+      status: {
+        source: 'status',
+        type: 'string',
+        isRequired: true,
+      },
+      type: {
+        source: 'type',
+        type: 'string',
+        isRequired: true,
+      }
+    }
   },
   address: {
     source: 'address',
@@ -143,8 +87,7 @@ const userOutputFields = {
       country: { source: 'country', type: 'string', isRequired: true },
       countryCode: { source: 'countryCode', type: 'string', isRequired: true },
     },
-  },
-  createdAt: { source: 'createdAt', type: 'string', isRequired: true },
+  }
 };
 
 const apiSpecs = {
@@ -215,16 +158,18 @@ const apiSpecs = {
   get_user: {
     name: 'Fetch Authenticated User Details',
     id: 'get_user',
-    url: '/api/v2/user',
+    url: '/api/v2/user/',
     method: 'GET',
     headers: {
       Authorization: 'string',
       'x-trace-id': 'string',
       accept: 'application/json',
     },
-    query_params: {},
+    query_params: {
+      apiKey: { type: 'string', isRequired: 'true', value: '' },
+    },
     expected_status: 200,
-    response_root_field_name: 'response',
+    response_root_field_name: 'data',
     response_required_fields: user_response_fields.required,
     response_optional_fields: user_response_fields.optional,
     output_fields: userOutputFields,

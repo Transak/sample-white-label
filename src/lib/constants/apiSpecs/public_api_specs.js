@@ -96,7 +96,7 @@ const apiSpecs = {
   quote: {
     name: `Get Quote`,
     id: 'quote',
-    url: '/api/v1/pricing/public/widget/quotes',
+    url: '/api/v2/lookup/quotes',
 
     method: 'GET',
     headers: {
@@ -108,7 +108,7 @@ const apiSpecs = {
       paymentMethod: { type: 'string', isRequired: 'true', value: '' },
       isBuyOrSell: { type: 'string', isRequired: 'true', value: '' },
       fiatAmount: { type: 'number', isRequired: 'true', value: '' },
-      partnerApiKey: { type: 'string', isRequired: 'true', value: '' },
+      apiKey: { type: 'string', isRequired: 'true', value: '' },
       network: { type: 'string', isRequired: 'true', value: '' },
       quoteCountryCode: { type: 'string', isRequired: 'true', value: '' },
       kycShareToken: { type: 'string', isRequired: 'false', value: '' },
@@ -116,7 +116,7 @@ const apiSpecs = {
       partnerApiKey: { type: 'string', isRequired: 'true', value: '' },
     },
     expected_status: 200,
-    response_root_field_name: 'response',
+    response_root_field_name: 'data',
     response_required_fields: {
       quoteId: 'string',
       conversionPrice: 'number',

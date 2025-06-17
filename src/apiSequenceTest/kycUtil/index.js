@@ -11,16 +11,16 @@ async function kycApiSequenceTests(transak) {
   // ✅ Fetch Quote
   const quoteData = await transak.public.getQuote(
     {
-      ...sampleData.quoteFields, 
+      ...sampleData.quoteFields,
       ...(
-        sampleData.env.IS_KYC_THOUGH_RELIANCE === true ? 
-        { 
-          kycShareToken: sampleData.kycRelianceDetails.kycShareToken, 
+        sampleData.env.IS_KYC_THOUGH_RELIANCE === true ?
+        {
+          kycShareToken: sampleData.kycRelianceDetails.kycShareToken,
           kycShareTokenProvider: sampleData.kycRelianceDetails.kycShareTokenProvider,
-          partnerApiKey: transak.client.config.partnerApiKey 
+          partnerApiKey: transak.client.config.partnerApiKey
         } :
         {}
-      ) 
+      )
     }
   );
   if (quoteData && quoteData.quoteId) quoteId = quoteData.quoteId;
@@ -41,11 +41,11 @@ async function fetchAndSubmitKYCForms(transak, quoteId) {
   console.log("*******", kycForms);
 
   console.log(`✅ KYC forms fetched.`);
-  
+
   const hasKycRelianceWaitForm = kycForms.forms.some(form => form.id === "kycReliance");
   if (hasKycRelianceWaitForm) {
     await waitForkycShareTokenToReachTerminalState(transak, sampleData.kycRelianceDetails.kycShareToken, sampleData.kycRelianceDetails.kycShareTokenProvider, quoteId)
-    
+
     // Get a fresh list of KYC forms to check if any remaining data needs to be submitted, which we were not able to get from the KYC Share Token
     console.log(`✅ Check after the KYC Share Token is processed if any form needs to be submitted.`);
     kycForms = await transak.user.getKycForms({ quoteId });
@@ -67,7 +67,7 @@ async function fetchAndSubmitKYCForms(transak, quoteId) {
  */
 async function submitKYCForms({ transak, forms, quoteId }) {
   let index = 0;
-  
+
   while (index < forms.length) {
     const form = forms[index];
     const formId = form.id;
@@ -115,13 +115,13 @@ async function submitKYCForms({ transak, forms, quoteId }) {
     // Compare forms in kycForms with current forms array and add missing forms
     const currentFormIds = forms.map(form => form.id);
     newForms = newForms.filter(form => !currentFormIds.includes(form.id));
-    
+
     if (newForms.length > 0) {
       console.log(`🔄 Adding ${newForms.length} new forms that weren't in the original forms array`);
       forms.push(...newForms);
       console.log(`📋 Updated forms length: ${forms.length}`);
     }
-    
+
     // Move to the next form
     index++;
   }
@@ -162,7 +162,7 @@ async function handleKYCVerificationViaApi(transak) {
   if (!userData || !userData.email)
     throw new Error('❌ User data not found in memory');
 
-  if (userData.kyc?.l1?.status !== 'APPROVED') {
+  if (userData.kyc?.status !== 'APPROVED') {
     console.log(
       `⚠️ KYC not approved (Current Status: ${userData.kyc?.status}). Initiating KYC submission...`
     );
@@ -213,7 +213,7 @@ async function waitForkycShareTokenToReachTerminalState(transak, kycShareToken, 
     if (shareTokenStatus === 'DONE' || shareTokenStatus === 'FAILED') {
       console.log(`✅ KYC Share Token Processing complete. Share Token Status: ${shareTokenStatus}`);
       return shareTokenStatus;
-    } 
+    }
 
     console.log(
       `🔄 KYC Share Token processing (Current Status: ${shareTokenStatus})... Retrying (${retries + 1}/${maxRetries})`

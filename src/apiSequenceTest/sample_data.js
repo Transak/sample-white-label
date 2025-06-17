@@ -1,17 +1,16 @@
 export const sampleData = {
   "env":{
-    "PARTNER_API_KEY": "a9d9cc56-a524-4dd7-8008-59f36bd6fa97",
+    "PARTNER_API_KEY": "0b4a8ff3-0d7e-409b-a6b9-3b82094b0f03",
     "ACCESS_TOKEN": "",
-    "EMAIL": "shashank+7222339273@transak.com",
+    "EMAIL": "anshul.garg@transak.com",
     "OTP_CODE": "3651",
     "ENVIRONMENT": "staging",
-    "frontend-auth": "9TRUtEM_RLns4Tp7h34wtvA2h*yc2ty2EhChtWtAdRko!EpVrpvH26xf_YJPM_qqiEG4LsL7TJiB6wg79BjtLGHdaKu6gHsceDHQ",
     "WIDGET_DOMAIN_STAGING": "https://global-stg.transak.com",
     "WIDGET_DOMAIN_PRODUCTION": "https://global.transak.com",
     "WIDGET_DOMAIN": "",
-    "IS_KYC_THOUGH_RELIANCE": true,
+    "IS_KYC_THOUGH_RELIANCE": false,
   },
-  "kycRelianceDetails":{ // This details needs to be filled if IS_KYC_THOUGH_RELIANCE is set as True 
+  "kycRelianceDetails":{ // This details needs to be filled if IS_KYC_THOUGH_RELIANCE is set as True
     "kycShareToken": "_act-sbx-jwt-eyJhbGciOiJub25lIn0.eyJqdGkiOiJfYWN0LXNieC1lYWU2ZDY0NC1lZmZkLTQ0YTMtYWFmYi00OWYwOWEwNDc4ZWEiLCJ1cmwiOiJodHRwczovL2FwaS5zdW1zdWIuY29tIn0.",
     "kycShareTokenProvider": "SUMSUB",
   },

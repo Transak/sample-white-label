@@ -26,27 +26,18 @@ class UserService {
       endpointId: 'request_ott',
       data: { apiKey: this.partnerApiKey },
       params: {},
-      headers: { 'Authorization': `${this.client.accessToken}` },
+      headers: {  },
     });
   }
 
-  async getUser(data) {
-    let accessToken;
-    if (data && data.accessToken) accessToken = data.accessToken;
-
-    const requestConfig = {
+  async getUser() {
+    const response = await this.client.request({
       endpointId: 'get_user',
       data: {},
-      params: {},
-      headers: {},
-    };
-    if (accessToken) requestConfig.headers['authorization'] = accessToken;
-    const userData = await this.client.request(requestConfig);
-    if (userData && userData.id) {
-      this.client.setUserData(userData);
-      if (accessToken) this.client.setAccessToken(accessToken);
-    }
-    return userData;
+      params: { apiKey: this.partnerApiKey },
+      headers: { 'Authorization': `${this.client.accessToken}` },
+    });
+    this.client.setUserData(response);
   }
 
   async getKycForms({ quoteId }) {

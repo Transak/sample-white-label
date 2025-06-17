@@ -33,6 +33,11 @@ const EmailVerification = ({ onVerificationComplete }) => {
       if (response.created) {
         setVerificationStatus('Email verified successfully!');
         onVerificationComplete(true);
+
+        //test for getUser now
+        const response1 = await transakSdk.user.getUser();
+        console.log(response1)
+
       } else {
         setVerificationStatus('Verification failed. Please try again.');
         onVerificationComplete(false);
