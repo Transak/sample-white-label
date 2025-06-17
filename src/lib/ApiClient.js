@@ -60,7 +60,8 @@ class ApiClient {
           )
         ),
         'Content-Type': 'application/json',
-        'x-trace-id': this.traceId,
+        //Todo: Commented due to cors error
+        //'x-trace-id': this.traceId,
       };
 
       const requestConfig = {

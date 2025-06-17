@@ -151,22 +151,22 @@ const apiSpecs = {
   send_email_otp: {
     name: 'Send Email OTP',
     id: 'send_email_otp',
-    url: '/api/v2/user/email/send',
+    url: '/api/v2/auth/login',
     method: 'POST',
     headers: {
       'x-trace-id': 'string',
-      'frontend-auth': 'string',
       accept: 'application/json',
       'content-type': 'application/json',
     },
     expected_status: 200,
     body: {
       email: { type: 'string', isRequired: 'true', value: '' },
-      partnerApiKey: { type: 'string', isRequired: 'true', value: '' },
+      apiKey: { type: 'string', isRequired: 'true', value: '' },
     },
-    response_root_field_name: 'response',
+    response_root_field_name: 'data',
     response_required_fields: {
       isTncAccepted: 'boolean',
+      stateToken: 'string',
     },
     response_optional_fields: {},
     output_fields: {
@@ -175,12 +175,17 @@ const apiSpecs = {
         type: 'boolean',
         isRequired: true,
       },
+      stateToken: {
+        source: 'stateToken',
+        type: 'string',
+        isRequired: true,
+      }
     },
   },
   verify_email_otp: {
     name: 'Verify Email OTP',
     id: 'verify_email_otp',
-    url: '/api/v2/user/email/verify',
+    url: '/api/v2/auth/verify',
     method: 'POST',
     headers: {
       'x-trace-id': 'string',
@@ -189,23 +194,22 @@ const apiSpecs = {
     },
     expected_status: 200,
     body: {
-      partnerApiKey: { type: 'string', isRequired: 'true', value: '' },
+      apiKey: { type: 'string', isRequired: 'true', value: '' },
       email: { type: 'string', isRequired: 'true', value: '' },
-      emailVerificationCode: { type: 'string', isRequired: 'true', value: '' },
+      otp: { type: 'string', isRequired: 'true', value: '' },
+      stateToken: { type: 'string', isRequired: 'true', value: '' },
     },
-    response_root_field_name: 'response',
+    response_root_field_name: 'data',
     response_required_fields: {
-      id: 'string',
+      accessToken: 'string',
       ttl: 'number',
-      created: 'string',
-      userId: 'string',
+      created: 'string'
     },
     response_optional_fields: {},
     output_fields: {
-      id: { source: 'id', type: 'string', isRequired: true },
+      accessToken: { source: 'accessToken', type: 'string', isRequired: true },
       ttl: { source: 'ttl', type: 'number', isRequired: true },
-      created: { source: 'created', type: 'string', isRequired: true },
-      userId: { source: 'userId', type: 'string', isRequired: true },
+      created: { source: 'created', type: 'string', isRequired: true }
     },
   },
   get_user: {

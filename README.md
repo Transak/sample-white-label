@@ -46,7 +46,7 @@ import { TransakAPI } from './lib/index.js';
 // Optionally, if TransakAPI needs configuration, pass it here (e.g., your API key, base URL, etc.)
 const transakSdk = new TransakAPI({
     environment: 'staging',
-    partnerApiKey: 'a2374be4-c59a-400e-809b-72c226c74b8f',
+    partnerApiKey: '0b4a8ff3-0d7e-409b-a6b9-3b82094b0f03',
 });
 
 ```
@@ -60,7 +60,7 @@ const transakSdk = new TransakAPI({
 
 **Getting Started**
 
-To use this function, you must first **request a** `frontendAuth` &  ****`partnerApiKey` **Key** from Transak. You can obtain it by reaching out to: **Sales Team:** [sales@transak.com](mailto:sales@transak.com).  Once you receive your **Partner** **API key** and **Frontend Auth token**, you can pass them in the request along with the **user’s email address**.
+To use this function, you must first **request a** `partnerApiKey` **Key** from Transak. You can obtain it by reaching out to: **Sales Team:** [sales@transak.com](mailto:sales@transak.com).  Once you receive your **Partner** **API key**, you can pass them in the request along with the **user’s email address**.
 
 **How It Works**
 
@@ -76,21 +76,25 @@ The `sendEmailOtp` function is a **non-authenticated** API method that allows yo
 **Example Usage**
 
 ```jsx
-await transak.user.sendEmailOtp({ email: 'user@example.com', frontendAuth: 'your-frontend-auth' });
+await transak.user.sendEmailOtp({ email: 'user@example.com', apiKey: 'partner-api-key' });
 ```
 
 > Response Output Fields:
 > 
 
 ```json
-{ "isTncAccepted": "boolean" }
+{ "isTncAccepted": "boolean",
+  "stateToken": "string",
+  "email": "string",
+  "expiresIn": "integer"
+}
 ```
 
 ### **Verify Email OTP**
 
 The `verifyEmailOtp` is a **non-authenticated API** that allows you to **verify a user’s email using an OTP** and retrieve an **access token** in return.
 
-Once you have successfully called `sendEmailOtp`, you need to pass the **email verification code** along with the user’s email to **verify the OTP**.
+Once you have successfully called `sendEmailOtp`, you need to pass the **otp** & **stateToken** along with the user’s email to **verify the OTP**.
 
 **Access Token Usage**
 
@@ -101,8 +105,10 @@ Once you have successfully called `sendEmailOtp`, you need to pass the **email v
 
 ```jsx
 const response = await transak.user.verifyEmailOtp({
+    apiKey: 'partner-api-key',
     email: 'user@example.com',
-    emailVerificationCode: '123456'
+    otp: '123456',
+    stateToken: 'state-token-from-sendEmailOtp-response'
 });
 console.log(response);
 ```
@@ -112,10 +118,9 @@ console.log(response);
 
 ```json
 {
-  "id": "string", // ID is equal to the user's access token
+  "accessToken": "string", //user's access token for authenticated API calls
   "ttl": "number", // TTL is generally the TTL of the access token; access token expiry is generally 30 days from generation
-  "created": "string", // Date created means date-time
-  "userId": "string"
+  "created": "string"
 }
 ```
 

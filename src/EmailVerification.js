@@ -4,11 +4,12 @@ import { TransakAPI } from './lib/index.js';
 // Optionally, if TransakAPI needs configuration, pass it here (e.g., your API key, base URL, etc.)
 const transakSdk = new TransakAPI({
     environment: 'staging',
-    partnerApiKey: 'a2374be4-c59a-400e-809b-72c226c74b8f',
+    partnerApiKey: '0b4a8ff3-0d7e-409b-a6b9-3b82094b0f03',
 });
 
 const EmailVerification = () => {
   const [email, setEmail] = useState('');
+  const [stateToken, setStateToken] = useState('');
   const [token, setToken] = useState('');
   const [message, setMessage] = useState('');
   const [verificationStatus, setVerificationStatus] = useState('');
@@ -17,9 +18,9 @@ const EmailVerification = () => {
   const handleSendEmail = async () => {
     try {
       // Replace with the actual method provided by the Transak API client.
-      const frontendAuth = `9TRUtEM_RLns4Tp7h34wtvA2h*yc2ty2EhChtWtAdRko!EpVrpvH26xf_YJPM_qqiEG4LsL7TJiB6wg79BjtLGHdaKu6gHsceDHQ`
-      const response = await transakSdk.user.sendEmailOtp({ email, frontendAuth });
+      const response = await transakSdk.user.sendEmailOtp({ email });
       console.log(response)
+      setStateToken(response.stateToken)
       setMessage(`Verification email sent to ${email}. Please check your inbox.`);
     } catch (error) {
       setMessage(`Error sending verification email: ${error.message}`);
@@ -29,9 +30,11 @@ const EmailVerification = () => {
   // Function to call the API to verify the email using a token
   const handleVerifyEmail = async () => {
     try {
-      // Replace with the actual method provided by the Transak API client.
-      const response = await transakSdk.user.verifyEmailOtp({ email, 
-        emailVerificationCode: token });
+      const response = await transakSdk.user.verifyEmailOtp({
+        email: email,
+        otp: token,
+        stateToken: stateToken
+      });
       if (response.created) {
         setVerificationStatus('Email verified successfully!');
       } else {
