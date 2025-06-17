@@ -76,7 +76,7 @@ The `sendEmailOtp` function is a **non-authenticated** API method that allows yo
 **Example Usage**
 
 ```jsx
-await transak.user.sendEmailOtp({ email: 'user@example.com', apiKey: 'partner-api-key' });
+await transak.user.sendEmailOtp({ email: 'user@example.com' });
 ```
 
 > Response Output Fields:
@@ -105,7 +105,6 @@ Once you have successfully called `sendEmailOtp`, you need to pass the **otp** &
 
 ```jsx
 const response = await transak.user.verifyEmailOtp({
-    apiKey: 'partner-api-key',
     email: 'user@example.com',
     otp: '123456',
     stateToken: 'state-token-from-sendEmailOtp-response'
@@ -582,7 +581,7 @@ First, retrieve a one-time token from the Transak SDK. This token will be used t
 const ottResponse = await transak.user.requestOtt();
 
 // Extract the token from the response
-const ottToken = ottResponse.token;
+const ottToken = ottResponse.ott;
 ```
 
 > **Token Characteristics:**

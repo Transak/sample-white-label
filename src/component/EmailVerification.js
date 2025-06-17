@@ -1,13 +1,8 @@
-// src/EmailVerification.js
+// src/component/EmailVerification.js
 import React, { useState } from 'react';
-import { TransakAPI } from './lib/index.js';
-// Optionally, if TransakAPI needs configuration, pass it here (e.g., your API key, base URL, etc.)
-const transakSdk = new TransakAPI({
-    environment: 'staging',
-    partnerApiKey: '0b4a8ff3-0d7e-409b-a6b9-3b82094b0f03',
-});
+import { transakSdk } from '../lib/TransakConfig.js';
 
-const EmailVerification = () => {
+const EmailVerification = ({ onVerificationComplete }) => {
   const [email, setEmail] = useState('');
   const [stateToken, setStateToken] = useState('');
   const [token, setToken] = useState('');
@@ -37,11 +32,14 @@ const EmailVerification = () => {
       });
       if (response.created) {
         setVerificationStatus('Email verified successfully!');
+        onVerificationComplete(true);
       } else {
         setVerificationStatus('Verification failed. Please try again.');
+        onVerificationComplete(false);
       }
     } catch (error) {
       setVerificationStatus(`Error verifying email: ${error.message}`);
+      onVerificationComplete(false);
     }
   };
 

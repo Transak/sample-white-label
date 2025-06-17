@@ -24,9 +24,9 @@ class UserService {
   async requestOtt() {
     return this.client.request({
       endpointId: 'request_ott',
-      data: { partnerApiKey: this.partnerApiKey },
+      data: { apiKey: this.partnerApiKey },
       params: {},
-      headers: { 'Authorization': `Bearer ${this.client.accessToken}` },
+      headers: { 'Authorization': `${this.client.accessToken}` },
     });
   }
 

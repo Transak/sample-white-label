@@ -1,11 +1,19 @@
 // src/App.js
-import React from 'react';
-import EmailVerification from './EmailVerification.js';
+import React, { useState } from 'react';
+import EmailVerification from './component/EmailVerification.js';
+import CreateOrderOtt from './component/CreateOrderOtt.js';
 
 function App() {
+  const [isVerified, setIsVerified] = useState(false);
+
+  const handleVerificationComplete = (status) => {
+    setIsVerified(status);
+  };
+
   return (
     <div className="App">
-      <EmailVerification />
+      <EmailVerification onVerificationComplete={handleVerificationComplete} />
+      {isVerified && <CreateOrderOtt />}
     </div>
   );
 }
