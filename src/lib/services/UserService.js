@@ -4,32 +4,30 @@ class UserService {
     this.partnerApiKey = client.config.partnerApiKey;
   }
 
-  async sendEmailOtp({ email, frontendAuth }) {
-    if (!frontendAuth) throw new Error('Frontend Auth is required');
+  async sendEmailOtp({ email }) {
     return this.client.request({
       endpointId: 'send_email_otp',
-      data: { email, partnerApiKey: this.partnerApiKey },
+      data: { email, apiKey: this.partnerApiKey },
       params: {},
-      headers: { 'frontend-auth': frontendAuth },
-    });
-  }
-
-  async requestOtt() {
-    return this.client.request({
-      endpointId: 'request_ott',
-      data: { partnerApiKey: this.partnerApiKey },
-      params: {},
-      headers: { 'Authorization': `Bearer ${this.client.accessToken}` },
     });
   }
 
   async verifyEmailOtp(data) {
     const response = await this.client.request({
       endpointId: 'verify_email_otp',
-      data: { ...data, partnerApiKey: this.partnerApiKey },
+      data: { ...data, apiKey: this.partnerApiKey },
     });
-    if (response && response.id) await this.client.setAccessToken(response.id);
+    if (response && response.accessToken) await this.client.setAccessToken(response.accessToken);
     return response;
+  }
+
+  async requestOtt() {
+    return this.client.request({
+      endpointId: 'request_ott',
+      data: { apiKey: this.partnerApiKey },
+      params: {},
+      headers: { 'Authorization': `${this.client.accessToken}` },
+    });
   }
 
   async getUser(data) {
