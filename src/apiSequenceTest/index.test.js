@@ -23,13 +23,14 @@ describe('Authentication API Tests', function () {
         '❌ Email is missing. Please provide a valid email in env.'
       );
 
-    // if (accessToken)
-    //   isAccessTokenValid = await transak.isAccessTokenValid(accessToken);
-    //
-    // if (!isAccessTokenValid) {
-    //   console.log(
-    //     '⚠️ Access token is invalid or expired. Triggering email verification...'
-    //   );
+    //Verify Access Token
+    if (accessToken)
+      isAccessTokenValid = await transak.isAccessTokenValid(accessToken);
+
+    if (!isAccessTokenValid) {
+      console.log(
+          '⚠️ Access token is invalid or expired. Triggering email verification...'
+      );
 
       // Send email OTP
       const sendEmailOtpData = await transak.user.sendEmailOtp({
@@ -39,9 +40,9 @@ describe('Authentication API Tests', function () {
       await executeApiTest('send_email_otp', sendEmailOtpData);
 
       const otp =
-        sampleData.env.ENVIRONMENT === 'staging'
-          ? `${sampleData.env.OTP_CODE}`
-          : readlineSync.question('Enter the OTP received on email: ');
+          sampleData.env.ENVIRONMENT === 'staging'
+              ? `${sampleData.env.OTP_CODE}`
+              : readlineSync.question('Enter the OTP received on email: ');
 
       // 4️⃣ Verify email OTP and get new accessToken
       const accessTokenData = await transak.user.verifyEmailOtp({
@@ -61,11 +62,16 @@ describe('Authentication API Tests', function () {
       //Fetch user again with the new token
       await transak.user.getUser();
 
-    if (transak.client.userData.partnerUserId)
+      if (transak.client.userData.partnerUserId)
+        console.log(
+            `✅ User authenticated successfully. Access token - ${sampleData.env.ACCESS_TOKEN}`
+        );
+      else throw new Error('❌ User not authenticated.');
+    } else {
       console.log(
-        `✅ User authenticated successfully. Access token - ${sampleData.env.ACCESS_TOKEN}`
+          '✅️ Access token is valid'
       );
-    else throw new Error('❌ User not authenticated.');
+    }
   });
 
   it('should fetch user details and validate response fields', async function () {

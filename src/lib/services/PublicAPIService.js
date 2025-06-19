@@ -16,15 +16,17 @@ class PublicAPIService {
     return this.client.request({
       endpointId: 'crypto_currencies_list',
       data: null,
-      params: null,
-    });
+      params: {},
+    })
   }
 
   async getFiatCurrencies() {
     return this.client.request({
       endpointId: 'fiat_currencies_list',
       data: null,
-      params: null,
+      params: {
+        apiKey: this.partnerApiKey,
+      },
     });
   }
 }
