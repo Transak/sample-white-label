@@ -314,6 +314,30 @@ const apiSpecs = {
     response_optional_fields: {},
     output_fields: {},
   },
+  kyc_reliance_status: {
+    name: 'Get KYC Reliance Status',
+    id: 'kyc_reliance_status',
+    url: '/api/v2/user/share-token-status',
+    method: 'GET',
+    headers: {
+      'x-trace-id': 'string',
+      Authorization: 'string',
+    },
+    query_params: {
+      quoteId: { type: 'string', isRequired: 'true', value: '' },
+      kycShareTokenProvider: { type: 'string', isRequired: 'true', value: '' },
+      kycShareToken: { type: 'string', isRequired: 'true', value: '' }
+    },
+    expected_status: 200,
+    response_root_field_name: 'data',
+    response_required_fields: {
+      shareTokenStatus: 'string',
+    },
+    response_optional_fields: {},
+    output_fields: {
+      shareTokenStatus: {source: 'shareTokenStatus', type: 'string', isRequired: 'true'},
+    }
+  },
   request_ott: {
     name: 'Request OTT',
     id: 'request_ott',

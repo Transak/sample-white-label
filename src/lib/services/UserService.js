@@ -107,6 +107,15 @@ class UserService {
     });
   }
 
+  async getKycRelianceStatus({ quoteId, kycShareToken }) {
+    return this.client.request({
+      endpointId: 'kyc_reliance_status',
+      data: {},
+      params: { quoteId, kycShareToken, kycShareTokenProvider: 'SUMSUB'},
+      headers: { 'Authorization': `${this.client.accessToken}` },
+    });
+  }
+
   async refreshAccessToken(accessToken) {
     const response = await this.client.request({
       endpointId: 'refresh_access_token',
