@@ -336,8 +336,31 @@ const apiSpecs = {
     output_fields: {
       ott: { source: 'ott', type: 'string', isRequired: true },
     },
+  },
+  refresh_access_token: {
+    name: 'Refresh Access Token',
+    id: 'refresh_access_token',
+    url: '/api/v2/auth/refresh',
+    method: 'GET',
+    headers: {
+      'x-trace-id': 'string',
+      Authorization: 'string',
+    },
+    expected_status: 200,
+    response_root_field_name: 'data',
+    response_required_fields: {
+      accessToken: 'string',
+    },
+    response_optional_fields: {},
+    output_fields: {
+      accessToken: {
+        source: 'accessToken',
+        type: 'string',
+        isRequired: true,
+      }
+    },
   }
 };
 
-//default export module nodejs
+
 export default apiSpecs;
