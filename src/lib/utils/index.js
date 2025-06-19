@@ -134,10 +134,7 @@ function handleAlreadyExistOrderCase(result) {
     if (result.errorMessage === 'Order exists' && result.data && result.data.id) {
         const errorDetails = {
             message:
-                'Order already exists, please complete or cancel the existing order',
-            orderId: result.data.id,
-            status: result.data.status,
-            createdAt: result.data.createdAt,
+                'Order already exists, please complete or cancel the existing order'
         };
         const error = new Error(errorDetails.message);
         error.details = errorDetails;
