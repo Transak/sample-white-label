@@ -106,6 +106,20 @@ class UserService {
       headers: { 'Authorization': `${this.client.accessToken}` },
     });
   }
+
+  async refreshAccessToken(accessToken) {
+    const response = await this.client.request({
+      endpointId: 'refresh_access_token',
+      data: {},
+      params: {},
+      headers: { 'Authorization': `${accessToken}` },
+    });
+    if (response && response.accessToken) {
+      this.client.setAccessToken(response.accessToken);
+    }
+    return response;
+  }
+
 }
 
 function validatePurposeOfUsageForm(purposeList) {

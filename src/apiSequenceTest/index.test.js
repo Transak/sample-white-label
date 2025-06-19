@@ -4,6 +4,7 @@ import { handleKYCVerificationViaApi } from './kycUtil/index.js';
 import { orderApiSequenceTests } from './orderUtil/index.js';
 import { sampleData } from './sample_data.js';
 import { executeApiTest } from './utils/index.js';
+import {authenticateUser} from "./userUtil/index.js";
 
 const transak = new TransakAPI({
   environment: sampleData.env.ENVIRONMENT,
@@ -18,6 +19,7 @@ describe('Authentication API Tests', function () {
   this.timeout(20000000); // Increase timeout for API calls
 
   it('should ensure accessToken is valid or fetch a new one', async function () {
+
     if (!email)
       throw new Error(
         '❌ Email is missing. Please provide a valid email in env.'
@@ -27,51 +29,34 @@ describe('Authentication API Tests', function () {
     if (accessToken)
       isAccessTokenValid = await transak.isAccessTokenValid(accessToken);
 
+    //Refresh Access Token if not valid
     if (!isAccessTokenValid) {
+      if (accessToken && accessToken.length > 0) {
+        try {
+          console.log('🔄 Refreshing Access Token ...');
+          const res = await transak.user.refreshAccessToken(accessToken)
+          console.log(`✅ Refreshed Access Token: ${res?.accessToken}`);
+
+          console.log('🔄 Get User Details with new Access Token');
+          isAccessTokenValid = await transak.isAccessTokenValid(res?.accessToken);
+
+        } catch (error) {
+          console.log('✅ Refresh Access Token failed.');
+        }
+      }
+    }
+
+    if(!isAccessTokenValid) {
       console.log(
           '⚠️ Access token is invalid or expired. Triggering email verification...'
       );
-
-      // Send email OTP
-      const sendEmailOtpData = await transak.user.sendEmailOtp({
-        email
-      });
-      // ✅ Validate user response
-      await executeApiTest('send_email_otp', sendEmailOtpData);
-
-      const otp =
-          sampleData.env.ENVIRONMENT === 'staging'
-              ? `${sampleData.env.OTP_CODE}`
-              : readlineSync.question('Enter the OTP received on email: ');
-
-      // 4️⃣ Verify email OTP and get new accessToken
-      const accessTokenData = await transak.user.verifyEmailOtp({
-        email,
-        otp,
-        stateToken: sendEmailOtpData.stateToken,
-      });
-
-      if (!accessTokenData)
-        throw new Error('❌ Failed to verify email and obtain access token.');
-
-      await executeApiTest('verify_email_otp', accessTokenData);
-      console.log('✅ Email verified successfully.');
-
-      sampleData.env.ACCESS_TOKEN = accessTokenData.accessToken;
-
-      //Fetch user again with the new token
-      await transak.user.getUser();
-
-      if (transak.client.userData.partnerUserId)
-        console.log(
-            `✅ User authenticated successfully. Access token - ${sampleData.env.ACCESS_TOKEN}`
-        );
-      else throw new Error('❌ User not authenticated.');
+      await authenticateUser(transak, email);
     } else {
       console.log(
-          '✅️ Access token is valid'
+          '✅ Access token is valid. Skipping email verification.'
       );
     }
+
   });
 
   it('should fetch user details and validate response fields', async function () {

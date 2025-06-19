@@ -2,7 +2,7 @@ export const sampleData = {
   "env":{
     "PARTNER_API_KEY": "0b4a8ff3-0d7e-409b-a6b9-3b82094b0f03",
     "ACCESS_TOKEN": "",
-    "EMAIL": "anshul.garg+testapi1@transak.com",
+    "EMAIL": "anshul.garg+testapi4@transak.com",
     "OTP_CODE": "3651",
     "ENVIRONMENT": "staging",
     "WIDGET_DOMAIN_STAGING": "https://global-stg.transak.com",
