@@ -321,7 +321,7 @@ const apiSpecs = {
     method: 'POST',
     headers: {
       'x-trace-id': 'string',
-      'Authorization': 'string',
+      Authorization: 'string',
       'Content-Type': 'application/json',
     },
     body: {
