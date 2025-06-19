@@ -2,95 +2,83 @@ const apiSpecs = {
   crypto_currencies_list: {
     name: 'Crypto Currencies API',
     id: 'crypto_currencies_list',
-
-    url: '/api/v2/currencies/crypto-currencies',
+    url: '/api/v2/lookup/currencies/crypto-currencies',
     method: 'GET',
     headers: {
       'x-trace-id': 'string',
     },
     expected_status: 200,
-    response_type: 'array',
-    response_root_field_name: 'response',
-    response_required_fields: [
-      {
-        _id: 'string',
-        coinId: 'string',
-        symbol: 'string',
-        name: 'string',
-        isAllowed: 'boolean',
-        isPopular: 'boolean',
-        isStable: 'boolean',
-        image: {
-          large: 'string',
-          small: 'string',
-          thumb: 'string',
-        },
-        network: {
-          name: 'string',
-          chainId: ['string', 'null', 'undefined'],
-          fiatCurrenciesNotSupported: ['array', 'boolean'],
-        },
-        address: ['string', 'null'],
-        addressAdditionalData: ['object', 'boolean'],
-        roundOff: 'number',
-        kycCountriesNotSupported: ['array', 'boolean'],
-        uniqueId: ['string', 'null'],
-        tokenType: 'string',
-        tokenIdentifier: ['null', 'string'],
-        isPayInAllowed: 'boolean',
-        minAmountForPayIn: ['null', 'number'],
-        maxAmountForPayIn: ['null', 'number'],
-        createdAt: ['string', 'boolean', 'null', 'undefined'],
-      },
-    ],
-    response_optional_fields: [
-      {
-        isIgnorePriceVerification: 'boolean',
-        decimals: 'number',
-        image_bk: {
-          large: 'string',
-          small: 'string',
-          thumb: 'string',
-        },
-      },
-    ],
+    response_root_field_name: 'data',
+    response_required_fields: {
+      cryptoCurrencies: [
+          {
+            isAllowed: 'boolean',
+            isStable: 'boolean',
+            name: 'string',
+            symbol: 'string',
+            uniqueId: 'string',
+            isSellAllowed: 'boolean',
+            network: {
+              name: 'string'
+            },
+            roundOff: 'number',
+            image: {
+              large: 'string',
+              small: 'string',
+              thumb: 'string',
+            },
+            kycCountriesNotSupported: ['array', 'boolean'],
+          }
+      ]
+    },
+    response_optional_fields: {},
     output_fields: {},
   },
   fiat_currencies_list: {
     name: 'Fiat Currencies API',
     id: 'fiat_currencies_list',
-
-    url: '/fiat/public/v1/currencies/fiat-currencies',
+    url: '/api/v2/lookup/currencies/fiat-currencies',
     method: 'GET',
     headers: {
       'x-trace-id': 'string',
     },
+    query_params: {
+      apiKey: { type: 'string', isRequired: 'true', value: '' }
+    },
     expected_status: 200,
-    response_type: 'array',
-    response_root_field_name: 'response',
-    response_required_fields: [
-      {
-        symbol: 'string',
-        name: 'string',
-
-        isAllowed: 'boolean',
-        paymentOptions: [
-          {
-            name: 'string',
-            id: 'string',
-            processingTime: 'string',
-            isActive: 'boolean',
-            minAmount: 'number',
-            maxAmount: 'number',
-          },
-        ],
-      },
-    ],
-    response_optional_fields: [
-      {
-        isPopular: 'boolean',
-      },
-    ],
+    response_root_field_name: 'data',
+    response_required_fields: {
+      fiatCurrencies: [
+        {
+          symbol: 'string',
+          name: 'string',
+          icon: 'string',
+          isAllowed: 'boolean',
+          isSellAllowed: 'boolean',
+          roundOff: 'number',
+          paymentOptions: [
+            {
+              name: 'string',
+              id: 'string',
+              processingTime: 'string',
+              icon: 'string',
+              isActive: 'boolean',
+              minAmount: 'number',
+              maxAmount: 'number',
+              isBuyAllowed: 'boolean',
+              isSellAllowed: 'boolean',
+              isNftAllowed: 'boolean',
+              defaultAmount: 'number',
+              defaultAmountForSell: 'number',
+              minAmountForSell: 'number',
+              maxAmountForSell: 'number',
+              limitCurrency: 'string',
+            },
+          ]
+        }
+      ]
+    },
+    response_optional_fields: {},
     output_fields: {},
   },
   quote: {

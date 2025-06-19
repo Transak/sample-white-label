@@ -41,6 +41,18 @@ class UserService {
     return response;
   }
 
+  async verifyAccessToken(accessToken) {
+    const response = await this.client.request({
+      endpointId: 'get_user',
+      data: {},
+      params: { apiKey: this.partnerApiKey },
+      headers: { 'Authorization': `${accessToken}` },
+    });
+    this.client.setUserData(response);
+    this.client.setAccessToken(accessToken);
+    return response;
+  }
+
   async getKYCRequirement({ quoteId }) {
     return await this.client.request({
       endpointId: 'get_kyc_requirement',
