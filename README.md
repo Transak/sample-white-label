@@ -123,6 +123,31 @@ console.log(response);
 }
 ```
 
+### **Refresh Access Token**
+
+The `refreshAccessToken` is an **authenticated API** that allows you to **regenerate an access token** when it is about to expire.
+
+This **access token remains valid for 30 days from the time of generation**
+- If not expired, you can use this API to refresh the token without requiring the user to re-enter their OTP.
+- If expired, the user must restart the authentication process by requesting a new OTP.
+
+
+**Example Usage**
+
+```jsx
+const response = await transak.user.refresh_access_token({ accessToken });
+console.log(response);
+```
+
+> Response Output Fields:
+>
+
+```json
+{
+  "accessToken": "string"
+}
+```
+
 ---
 
 ## Cryptocurrency, Fiat & Quote Data
