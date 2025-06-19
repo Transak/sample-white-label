@@ -4,45 +4,32 @@ class OrderService {
     this.partnerApiKey = client.config.partnerApiKey;
   }
 
-  async getOrderLimit({ kycType, isBuyOrSell, fiatCurrency }) {
+  async getUserLimits({ kycType, isBuyOrSell, fiatCurrency, paymentCategory }) {
     return this.client.request({
-      endpointId: 'order_limit',
+      endpointId: 'user_limits',
       data: {},
       params: {
         kycType,
         isBuyOrSell,
         fiatCurrency,
-        paymentCategory: 'bank_transfer',
+        paymentCategory,
       },
     });
   }
 
-  async walletReserve({ quoteId, walletAddress }) {
-    return this.client.request({
-      endpointId: 'wallet_reserve',
+  async createOrder({ quoteId, paymentMethod, walletAddress }) {
+    const result = await this.client.request({
+      endpointId: 'create_order',
       data: {
         quoteId,
+        paymentInstrumentId: paymentMethod,
         walletAddress,
       },
       params: {},
     });
-  }
-
-  async createOrder({ quoteId }) {
-    const result = await this.client.request({
-      endpointId: 'create_order',
-      data: {
-        reservationId: quoteId,
-      },
-      params: {},
-    });
-    if (result.errorMessage === 'Order exists' && result.data) {
+    if (result.errorMessage === 'Order exists') {
       const errorDetails = {
-        message:
-          'Order already exists, please complete or cancel the existing order',
-        orderId: result.data.id,
-        status: result.data.status,
-        createdAt: result.data.createdAt,
+        message: 'Order already exists, please complete or cancel the existing order'
       };
       const error = new Error(errorDetails.message);
       error.details = errorDetails;
@@ -56,7 +43,7 @@ class OrderService {
       endpointId: 'confirm_payment',
       data: {
         orderId,
-        paymentOptionId: paymentMethod,
+        paymentMethod,
       },
       params: {},
     });

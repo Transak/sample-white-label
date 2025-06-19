@@ -12,7 +12,7 @@ class TransakAPI {
   }
 
   async verifyAndSetAccessToken(token) {
-    const userData = await this.user.getUser({ accessToken: token });
+    const userData = await this.user.getUser();
     if (userData && userData.id) {
       this.client.setAccessToken(token);
       this.client.setUserData(userData);

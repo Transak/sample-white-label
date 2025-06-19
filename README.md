@@ -117,8 +117,8 @@ console.log(response);
 
 ```json
 {
-  "accessToken": "string", //user's access token for authenticated API calls
-  "ttl": "number", // TTL is generally the TTL of the access token; access token expiry is generally 30 days from generation
+  "accessToken": "string", 
+  "ttl": "number", 
   "created": "string"
 }
 ```
@@ -157,7 +157,7 @@ After fetching the **supported cryptocurrencies and fiat currencies**, you must 
 
 **KYC Process:**
 
-- The **quote ID** must be passed when calling `getKycForms()` .
+- The **quote ID** must be passed when calling `getKYCRequirement()` .
 - Based on the **order amount**, the user may be required to complete different KYC tiers (**Simple KYC, Standard KYC**).
 
 **Order Placement:**
@@ -176,7 +176,7 @@ Thus, `getQuote` plays a **vital role** in the **entire order flow**, from **KYC
     "paymentMethod": "sepa_bank_transfer",
     "isBuyOrSell": "BUY",
     "fiatAmount": 30,
-    "partnerApiKey": "string",
+    "apiKey": "string",
     "network": "arbitrum",
     "quoteCountryCode": "FR"
   });
@@ -230,18 +230,16 @@ console.log(user);
 
 ```json
 {
-  "id": "string", // User's unique identifier (UUID)
+  "partnerUserId": "string", // User's unique identifier (UUID)
   "firstName": "string | null", // User's first name or null if not submitted
   "lastName": "string | null", // User's last name or null if not submitted
   "email": "string", // User's email address
   "mobileNumber": "string | null", // User's mobile number with country code or null if not submitted
   "status": "string", // User's status (e.g., ACTIVE, INACTIVE)
   "dob": "string | null", // User's date of birth in ISO 8601 format or null if not submitted
-  "kyc.l1": {
+  "kyc": {
     "status": "string", // KYC status (NOT_SUBMITTED, SUBMITTED, APPROVED, REJECTED)
-    "type": "string | null", // KYC type (e.g., SIMPLE, STANDARD) Learn more here https://transak.com/kyc
-    "updatedAt": "string", // Last update timestamp in ISO 8601 format
-    "kycSubmittedAt": "string | null" // KYC submission timestamp or null if not submitted
+    "type": "string | null" // KYC type (e.g., SIMPLE, STANDARD) Learn more here https://transak.com/kyc
   },
   "address": {
     "addressLine1": "string", // First line of the address
@@ -251,14 +249,13 @@ console.log(user);
     "postCode": "string", // Postal code
     "country": "string", // Full country name
     "countryCode": "string" // ISO country code (e.g., FR for France)
-  } // If submitted then it will return with above address object or null if not submitted 
-  "createdAt": "string" // Account creation timestamp in ISO 8601 format
+  }
 }
 ```
 
-### **Get KYC Forms - Fetch Required KYC Forms Based on Quote ID**
+### **Get KYC Requirement - Fetch Required KYC Data Based on Quote ID**
 
-`getKycForms` is an **authenticated API call** that dynamically returns the **KYC forms a user needs to complete** based on the **quote ID**. Since Transak supports **multi-level KYC** across different countries, this API helps determine the exact KYC requirements for a user before proceeding with transactions.
+`getKycRequirement` is an **authenticated API call** that dynamically returns the **KYC data a user needs to complete** based on the **quote ID**. Since Transak supports **multi-level KYC** across different countries, this API helps determine the exact KYC requirements for a user before proceeding with transactions.
 
 The **quote ID** must be passed when calling this API, as it determines the required **KYC level (Simple KYC, Standard KYC, etc.)**. The response includes a list of **required KYC forms**, such as:
 
@@ -273,7 +270,7 @@ As per the **quote ID**, the system dynamically returns the appropriate KYC form
 **Example Usage**
 
 ```jsx
-const kycForms = await transak.user.getKycForms({ quoteId });
+const kycRequirement = await transak.user.getKYCRequirement({ quoteId });
 ```
 
 > Response Output Fields & User Schema
@@ -282,63 +279,17 @@ const kycForms = await transak.user.getKycForms({ quoteId });
 ```json
 {
   "kycType": "string", // Type of KYC (e.g., SIMPLE, STANDARD)
-  "forms": [
-    {
-      "id": "string", // Unique identifier for the form (e.g., personalDetails, address, purposeOfUsage)
-      "active": "boolean | null", // Indicates if the form is currently active (optional)
-      "onSubmit": "string | null", // Action to be triggered on form submission (e.g., updateUserData) (optional)
-      "hideProgress": "boolean" // Indicates whether the progress bar should be hidden
-    }
-  ]
-}
-```
-
-### **Fetch Personal Details & Address Form**
-
-`getKycFormsById` is an **authenticated API** that helps you retrieve the **specific KYC form details** required for user verification. This API should be called **after fetching** `getKycForms`, where you obtain the **form ID**.
-
-In this API call, you **pass the form Id** (retrieved from `getKycForms`) and receive a response containing:
-
-- **The list of required fields** → These fields need to be collected from the user.
-- **The endpoint to submit the data** → The response includes the relevant `patchUser`, `verify-ssn` **API endpoints** to submit personal, address or ssn details.
-
-This API primarily supports fetching **Personal Details**, **Address Details** and **US SSN** as part of the **KYC process.** 
-
-```jsx
-const personalDetailsForm = await transak.user.getKycFormById({ formId: 'personalDetails', quoteId: 'abcd-1234' });
-console.log(personalDetailsForm);
-```
-
-> Response Output Fields & User Schema
-> 
-
-```json
-{
-  "formId": "string", // Unique identifier for the form (e.g., personalDetails)
-  "formName": "string", // Name of the form (e.g., Personal Details)
-  "endpoint": {
-    "path": "string", // API endpoint path for form submission (e.g., /user)
-    "method": "string" // HTTP method for submission (e.g., PATCH, POST)
-  },
-  "fields": [
-    {
-      "id": "string", // Unique identifier for the field (e.g., firstName, lastName, mobileNumber)
-      "name": "string", // Display name of the field (e.g., First Name, Last Name)
-      "type": "string", // Type of input field (e.g., text, date, number)
-      "isRequired": "boolean", // Whether the field is mandatory
-      "regex": "string", // Regular expression for validation
-      "placeholder": "string", // Placeholder text for the field
-      "value": "string" // Default or user-entered value
-    }
-  ]
+  "status": "string", // kyc status (e.g., NOT_SUBMITTED, APPROVED, ADDITIONAL_FORMS_REQUIRED)
+  "isAllowedToPlaceOrder": "string", // Indicates if the user can place an order (e.g., YES, NO)
 }
 ```
 
 ### **Patch User - Update User’s Personal or Address Details**
 
-`patchUser` is an **authenticated API call** that allows updating a user’s **personal details** or **address details**. The response follows the **same schema as** `getUser()`, returning the updated user profile.
+`patchUserDetails` is an **authenticated API call** that allows updating a user’s **personal details** or **address details**. The response follows the **same schema as** `getUser()`, returning the updated user profile.
+This API is the first step to proceed with the **KYC process** when KYC status is NOT_SUBMITTED. It allows users to update their personal and address details, which are essential for KYC verification.
 
-The **fields that can be updated** via patchUser include:
+The **fields that can be updated** via patchUserDetails include:
 
 - **Personal Details:** firstName, lastName, mobileNumber, dob
 - **Address Details:** Address-related fields fetched via **getKycForms()**
@@ -347,27 +298,70 @@ Any modifications to user data must comply with **KYC requirements**, and certai
 
 ```jsx
 //Update user's personal details 
-await transak.user.patchUser({
-    firstName: 'John',
+await transak.user.patchUserDetails({
+    personalDetails: { firstName: 'John',
     lastName: 'Doe',
     mobileNumber: '+971505280689', //User's mobile number with country code
     dob: '1990-01-01' //YYYY-MM-DD
-});
-
-//Update user's address
-await transak.user.patchUser({
-  addressLine1: '101 Rue',
-  addressLine2: 'Saint-Pierre',
-  state: 'Calvados',
-  city: 'Caen',
-  postCode: '14000',
-  countryCode: 'FR' //ISO country code (e.g., FR for France)
+   }, 
+  addressDetails: {
+    addressLine1: '101 Rue',
+    addressLine2: 'Saint-Pierre',
+    state: 'Calvados',
+    city: 'Caen',
+    postCode: '14000',
+    countryCode: 'FR' //ISO country code (e.g., FR for France)
+  }
 });
 ```
 
-### **Submit Purpose of Usage**
+### **Get Additional Requirements - Fetch the additional forms required for KYC**
 
-`submitPurposeOfUsageForm` is an **authenticated API call** that is a mandatory step in the **KYC process** for both **Simple KYC and Standard KYC**.
+`getAdditionalRequirements` is an **authenticated API call** that dynamically returns the **KYC forms a user needs to complete** based on the **quote ID**. Since Transak supports **multi-level KYC** across different countries, this API helps determine the additional KYC requirements for a user before proceeding with transactions.
+When `getKycRequirement` returns a status of **ADDITIONAL_FORMS_REQUIRED**, it indicates that the user needs to complete more forms to proceed with KYC verification.
+
+The **quote ID** must be passed when calling this API, as it determines the required **KYC level (Simple KYC, Standard KYC, etc.)**. The response includes a list of **required KYC forms**, such as:
+
+```jsx
+await transak.user.getAdditionalKYCRequirements({
+    quoteId: 'abcd-1234' // The quote ID obtained from getQuote()
+});
+```
+
+> Response Output Fields & User Schema
+>
+
+```json
+{
+  "formsRequired": [
+    {
+      "type": "PURPOSE_OF_USAGE"
+    },
+    {
+      "type": "IDPROOF",
+      "metadata": {
+        "expiresAt": "Tue, 22 Apr 2025 03:33:51 GMT",
+        "kycUrl": "https://eu.onfido.app/l/e28138ac-15a9-4427-8dde-33f4ed1b0945",
+        "sdkToken": "eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjE3NDQwODg2MzEsInBheWxvYWQiOnsiYXBwIjoiMjljZjA3YTctNzJkZi00YjJhLWE5ZGUtODMyMGFjZDRiNDNmIiwiY2xpZW50X3V1aWQiOiIyZjM1MGI4My04ZjQwLTRlZGYtYWMyOC1jMzZkZTBjYWZmOWQiLCJpc19zYW5kYm94Ijp0cnVlLCJpc19zZWxmX3NlcnZpY2VfdHJpYWwiOmZhbHNlLCJpc190cmlhbCI6ZmFsc2UsInJlZiI6IioiLCJzYXJkaW5lX3Nlc3Npb24iOiJjNDliMmNkNC1iYzkzLTRmYmYtOTdiYS03ODJlODA0ZmJhOTIifSwidXVpZCI6InBsYXRmb3JtX3N0YXRpY19hcGlfdG9rZW5fdXVpZCIsImVudGVycHJpc2VfZmVhdHVyZXMiOnsidXNlQ3VzdG9taXplZEFwaVJlcXVlc3RzIjp0cnVlLCJ2YWxpZENyb3NzRGV2aWNlVXJscyI6WyIiXX0sInVybHMiOnsiZGV0ZWN0X2RvY3VtZW50X3VybCI6Imh0dHBzOi8vc2RrLm9uZmlkby5jb20iLCJzeW5jX3VybCI6Imh0dHBzOi8vc3luYy5vbmZpZG8uY29tIiwiaG9zdGVkX3Nka191cmwiOiJodHRwczovL2lkLm9uZmlkby5jb20iLCJhdXRoX3VybCI6Imh0dHBzOi8vYXBpLm9uZmlkby5jb20iLCJvbmZpZG9fYXBpX3VybCI6Imh0dHBzOi8vYXBpLm9uZmlkby5jb20iLCJ0ZWxlcGhvbnlfdXJsIjoiaHR0cHM6Ly9hcGkub25maWRvLmNvbSJ9fQ.MIGIAkIAjTJKuh2TpdbY66DwqZ3jPF9B12rL8ErbqdhZza6l43bgb2__Nxbb6hSwy1LZ4o6AdRZq3AW9qKRKhRp6B03d5BMCQgEGGLfOtjEkCiyrwdd4Vq_aStkCjJ2wJOaB9piY7EqeSYw1uWUHilYEemuOJ1_uR_kVkvCL7z93ivczCBPrJTDkzQ"
+      }
+    },
+    {
+      "type": "US_SSN"
+    }
+  ]
+}
+```
+
+`IDPROOF` Form already contain the **KYC URL** and **expiry timestamp**.
+- **A KYC URL** → This is a unique link generated by **Onfido**, our KYC provider.
+- **An Expiry Timestamp (expiresAt)** → The KYC URL is valid for a limited time and must be used before it expires.
+
+This **KYC URL must be provided to the user**, prompting them to complete their ID verification directly on **Onfido’s platform**. Once completed, the KYC status will be updated in Transak’s system.
+
+
+### **Update Purpose of Usage**
+
+`updatePurposeOfUsageForm` is an **authenticated API call** that is a mandatory step in the **KYC process** for both **Simple KYC and Standard KYC**.
 
 As part of regulatory compliance, users must declare the **purpose of their cryptocurrency transactions**. This API allows you to submit the user’s **intended use case** by passing an array of supported purposes.
 
@@ -384,7 +378,7 @@ As part of regulatory compliance, users must declare the **purpose of their cryp
 - "Buying crypto to use a web3 protocol"
 
 ```jsx
-const PurposeOfUsageFormData = await transak.user.submitPurposeOfUsageForm({
+const PurposeOfUsageFormData = await transak.user.updatePurposeOfUsageForm({
     purposeList: ["Buying/selling crypto for investments"],
   });
 console.log(PurposeOfUsageFormData);
@@ -395,12 +389,12 @@ console.log(PurposeOfUsageFormData);
 
 ```json
 {
-    "result": "ok"
+    "status": "SUBMITTED"
 }
 ```
 
 ### **Submit SSN**
-`verifySSN` is an **authenticated API call** that is a mandatory step in the **KYC process** when a user selects the **United States of America** as their country in the **Address Details**.
+`submitSSN` is an **authenticated API call** that is a mandatory step in the **KYC process** when a user selects the **United States of America** as their country in the **Address Details**.
 
 As part of regulatory compliance in the United States, users must provide their **Social Security Number (SSN)** for identity verification. This API allows you to submit the user's SSN securely through the Transak platform.
 
@@ -409,8 +403,9 @@ As part of regulatory compliance in the United States, users must provide their 
 - This is a required step for US users **before proceeding with order placement**.
 
 ```jsx
-const ssnVerificationResult = await transak.user.verifySSN({
+const ssnVerificationResult = await transak.user.submitSSN({
     ssn: '123-45-6789', // SSN in the format XXX-XX-XXXX or XXXXXXXXX
+    quoteId: 'abcd-1234' // The quote ID obtained from getQuote()
 });
 console.log(ssnVerificationResult);
 ```
@@ -420,49 +415,22 @@ console.log(ssnVerificationResult);
 
 ```json
 {
-    "result": "ok"
-}
-```
-
-### **Fetch ID Proof KYC Form**
-
-`getKycFormIdProof` is an **authenticated API** that is a mandatory step in the **KYC process** for only **Standard KYC (not Simple KYC).** This allows you to fetch the **ID Proof KYC form** required for user verification. Similar to how `getKycFormsById` is used for fetching **Personal Details** and **Address Details**, this API is used specifically for **ID Proof verification**.
-
-When calling this API, you need to pass the **formId: 'idProof'** along with the **quote ID**, and the response will include:
-
-- **A KYC URL** → This is a unique link generated by **Onfido**, our KYC provider.
-- **An Expiry Timestamp (expiresAt)** → The KYC URL is valid for a limited time and must be used before it expires.
-
-This **KYC URL must be provided to the user**, prompting them to complete their ID verification directly on **Onfido’s platform**. Once completed, the KYC status will be updated in Transak’s system.
-
-```jsx
-const idProofForm = await transak.user.getKycFormIdProof({ formId: 'idProof', quoteId: 'abcd-1234' });
-console.log(idProofForm);
-```
-
-> Response Output Fields:
-> 
-
-```json
-{
-    "formId": { "type": "string", "isRequired": true },
-    "formName": { "type": "string", "isRequired": true },
-    "kycUrl": { "type": "string", "isRequired": true },
-    "expiresAt": { "type": "string", "isRequired": true }
+    "status": "SUBMITTED"
 }
 ```
 
 ## Orders
 
-### Get Order Limits
+### Get User Limits
 
-`getOrderLimits` is an **authenticated API call** that allows you to **fetch the maximum transaction limits** a user can place over different time periods (`1-day, 30-day, 365-day`). These limits are determined by **KYC type**, **payment method**, and **fiat currency,** and provides a detailed overview based on **total**, **spent**, **remaining** and **exceeded limits**.
+`getUserLimits` is an **authenticated API call** that allows you to **fetch the maximum transaction limits** a user can place over different time periods (`1-day, 30-day, 365-day`). These limits are determined by **KYC type**, **payment method**, and **fiat currency,** and provides a detailed overview based on **total**, **spent**, **remaining** and **exceeded limits**.
 
 ```jsx
-const res = await transak.order.getOrderLimit({
+const res = await transak.order.getUserLimits({
     kycType: "SIMPLE", //or STANDARD
     isBuyOrSell: "BUY", 
-    fiatCurrency: "EUR"
+    fiatCurrency: "EUR",
+    paymentCategory: "bank_transfer" 
   });
 ```
 
@@ -494,35 +462,17 @@ const res = await transak.order.getOrderLimit({
 }
 ```
 
-### **Wallet Reserve - Link Wallet Address with Quote ID**
-
-`walletReserve` is an **authenticated API call** used to **link a user’s wallet address with a quote ID**. This step is required before **creating an order**, as the reserved wallet address is later sent to the **`createOrder` API** for transaction processing.
-
-When calling this API, you need to provide:
-
-- **quoteId** → The quote ID retrieved from getQuote().
-- **walletAddress** → The cryptocurrency wallet address where the funds will be received.
-
-Once the wallet is reserved, this information will be **automatically used** when placing an order.
-
-```jsx
-const res = await transak.order.walletReserve({
-    quoteId,
-    walletAddress: "0x.....",
- });
-```
-
 ### Create Order
 
 #### 1. Bank Transfer Flow
 
-`createOrder` is an **authenticated API call** that allows you to **create an order** based on the reserved **wallet address** and the **quote ID** obtained from `walletReserve()`.
+`createOrder` is an **authenticated API call** that allows you to **create an order** based on the provided **wallet address** and the **quote ID**`.
 
-After successfully reserving a wallet, you need to pass the **quoteId** in this API call. Based on the provided quote, the order will be generated, and you will receive the **order details** in the response.
+you need to pass the **quoteId**, **paymentInstrumentId** and **walletAddress** in this API call. Based on the provided information, the order will be generated, and you will receive the **order details** in the response.
 
 ```jsx
-  const orderData = await transak.order.createOrder({ quoteId });
-  orderId = orderData.id;
+  const orderData = await transak.order.createOrder({ quoteId, paymentMethod, walletAddress });
+  orderId = orderData.orderId;
 ```
 
 > Response Output Fields:
@@ -530,8 +480,8 @@ After successfully reserving a wallet, you need to pass the **quoteId** in this 
 
 ```json
 {
-	"id": "string", // Unique identifier for the transaction (UUID)
-	"userId": "string", // User's unique identifier (UUID)
+	"orderId": "string", // Unique identifier for the transaction (UUID)
+	"partnerUserId": "string", // User's unique identifier (UUID)
 	"status": "string", // Transaction status (e.g., COMPLETED, AWAITING_PAYMENT_FROM_USER, PENDING_DELIVERY_FROM_TRANSAK) You can learn more here https://docs.transak.com/docs/tracking-user-kyc-and-order-status
 	"isBuyOrSell": "string", // Type of transaction (BUY or SELL)
 	"fiatCurrency": "string", // Fiat currency used in the transaction (e.g., EUR, USD). The full list can be fetch using transak.public.getFiatCurrencies() or https://transak.com/global-coverage
@@ -547,24 +497,16 @@ After successfully reserving a wallet, you need to pass the **quoteId** in this 
 	"cryptoAmount": "number", // Amount of cryptocurrency received
 	"conversionPrice": "number", // Exchange rate between cryptoCurrency / fiat
 	"totalFeeInFiat": "number", // Total fees deducted in fiat currency
-	"paymentOptions": [
+	"paymentDetails": [
 		{
-			"currency": "string", // Currency of the payment method (e.g., EUR, USD)
-			"id": "string", // Payment method ID (e.g., sepa_bank_transfer)
+			"fiatCurrency": "string", // Currency of the payment method (e.g., EUR, USD)
+			"paymentMethod": "string", // Payment method ID (e.g., sepa_bank_transfer)
 			"name": "string", // Payment method name
 			"fields": [ { "name": "string", "value": "string"}, { "name": "string", "value": "string"} ] // List of required fields for the payment method
 		}
 	],
-	"transactionHash": "string", // Blockchain transaction hash
-	"createdAt": "string", // Timestamp when the transaction was created (ISO 8601 format)
-	"updatedAt": "string", // Timestamp of the last update (ISO 8601 format)
-	"completedAt": "string", // Timestamp when the transaction was completed (ISO 8601 format)
-	"statusHistories": [
-		{
-			"status": "string", // Status of the transaction at a specific time
-			"createdAt": "string" // Timestamp when the status was updated (ISO 8601 format)
-		}
-	]
+	"txHash": "string || null" // Blockchain transaction hash
+	
 }
 ```
 

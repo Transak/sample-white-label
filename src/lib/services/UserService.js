@@ -30,110 +30,70 @@ class UserService {
     });
   }
 
-  async getUser(data) {
-    let accessToken;
-    if (data && data.accessToken) accessToken = data.accessToken;
-
-    const requestConfig = {
+  async getUser() {
+    const response = await this.client.request({
       endpointId: 'get_user',
       data: {},
-      params: {},
-      headers: {},
-    };
-    if (accessToken) requestConfig.headers['authorization'] = accessToken;
-    const userData = await this.client.request(requestConfig);
-    if (userData && userData.id) {
-      this.client.setUserData(userData);
-      if (accessToken) this.client.setAccessToken(accessToken);
-    }
-    return userData;
-  }
-
-  async getKycForms({ quoteId }) {
-    const kycFormData = await this.client.request({
-      endpointId: 'get_kyc_forms',
-      data: {},
-      params: {
-        'metadata[quoteId]': quoteId,
-        onlyFormIds: true,
-        'metadata[formType]': 'KYC',
-      },
+      params: { apiKey: this.partnerApiKey },
+      headers: { 'Authorization': `${this.client.accessToken}` },
     });
-    return kycFormData;
-    // return transformGetKYCForms(kycFormData);
-  }
-
-  async getKycFormById({ formId, quoteId }) {
-    return this.client.request({
-      endpointId: 'get_kyc_forms_by_id',
-      data: {},
-      params: {
-        'formIds[]': formId,
-        'metadata[quoteId]': quoteId,
-        onlyFormIds: false,
-        'metadata[formType]': 'KYC',
-      },
-    });
-  }
-
-  async getKycFormIdProof({ formId, quoteId }) {
-    return this.client.request({
-      endpointId: 'get_kyc_forms_idProof',
-      data: {},
-      params: {
-        'formIds[]': formId,
-        'metadata[quoteId]': quoteId,
-        onlyFormIds: false,
-        'metadata[formType]': 'KYC',
-      },
-    });
-  }
-
-  async patchUser(data) {
-    validatePatchUserData(data);
-    return this.client.request({
-      endpointId: 'patch_user',
-      data,
-      params: {},
-    });
-  }
-
-  async submitPurposeOfUsageForm({ purposeList }) {
-    validatePurposeOfUsageForm(purposeList);
-    const response = await this.client.request({
-      endpointId: 'submit_purpose_of_usage',
-      data: { purposeList },
-      params: {},
-    });
-    if (response !== 'ok')
-      throw new Error('Failed to submit purpose of usage form.');
+    this.client.setUserData(response);
     return response;
   }
 
-  async shareTokenStatus(params) {
-    return this.client.request({
-      endpointId: 'share_token_status',
-      data: null,
-      params
+  async getKYCRequirement({ quoteId }) {
+    return await this.client.request({
+      endpointId: 'get_kyc_requirement',
+      data: {},
+      params: {
+        'metadata[quoteId]': quoteId,
+        apiKey: this.partnerApiKey,
+      },
+      headers: { 'Authorization': `${this.client.accessToken}` },
     });
   }
 
-  async verifySSN({ ssn }) {
-    if (!ssn) throw new Error('SSN is required');
+  async patchUserDetails(data) {
+    validatePatchUserData(data);
     return this.client.request({
-      endpointId: 'verify_ssn',
-      data: { ssn },
+      endpointId: 'patch_user_details',
+      data,
+      params: { apiKey: this.partnerApiKey },
+      headers: { 'Authorization': `${this.client.accessToken}` },
+    });
+  }
+
+  async getAdditionalKYCRequirements({ quoteId }) {
+    return await this.client.request({
+      endpointId: 'get_additional_requirements',
+      data: {},
+      params: {
+        'metadata[quoteId]': quoteId,
+      },
+      headers: { 'Authorization': `${this.client.accessToken}` },
+    });
+  }
+
+  async updatePurposeOfUsageForm({ purposeList }) {
+    validatePurposeOfUsageForm(purposeList);
+    const response = await this.client.request({
+      endpointId: 'update_purpose_of_usage',
+      data: { purposeList },
+      params: {},
+    });
+    if (response.status !== 'SUBMITTED')
+      throw new Error('Failed to update purpose of usage form');
+    return response;
+  }
+
+  async submitSSN({ ssn, quoteId }) {
+    return this.client.request({
+      endpointId: 'submit_ssn',
+      data: { ssn, quoteId },
       params: {},
       headers: { 'Authorization': `${this.client.accessToken}` },
     });
   }
-}
-
-function transformGetKYCForms(input) {
-  return {
-    kycType: input.kycType,
-    formIds: input.forms.map((form) => form.id),
-  };
 }
 
 function validatePurposeOfUsageForm(purposeList) {
@@ -161,8 +121,8 @@ function validatePurposeOfUsageForm(purposeList) {
 }
 
 function validatePatchUserData(data) {
-  const requiredGroupFields = ['firstName', 'lastName', 'mobileNumber', 'dob'];
-  const addressFields = [
+  const requiredPersonalDetails = ['firstName', 'lastName', 'mobileNumber', 'dob'];
+  const requiredAddressDetails = [
     'addressLine1',
     'addressLine2',
     'state',
@@ -171,31 +131,19 @@ function validatePatchUserData(data) {
     'countryCode',
   ];
 
-  const providedFields = Object.keys(data);
+  const providedFields = Object.keys(data.personalDetails) + Object.keys(data.addressDetails);
 
-  const hasAnyRequiredField = requiredGroupFields.some((field) =>
-    providedFields.includes(field)
-  );
-  const hasAllRequiredFields = requiredGroupFields.every((field) =>
+  const hasAllPersonalDetails = requiredPersonalDetails.every((field) =>
     providedFields.includes(field)
   );
 
-  if (hasAnyRequiredField && !hasAllRequiredFields) {
+  const hasAllAddressDetails = requiredAddressDetails.every((field) =>
+    providedFields.includes(field)
+  );
+
+  if (!hasAllPersonalDetails || !hasAllAddressDetails) {
     throw new Error(
-      `If any of the following fields are provided: ${requiredGroupFields.join(', ')}, all of them must be provided.`
-    );
-  }
-
-  const hasAnyAddressField = addressFields.some((field) =>
-    providedFields.includes(field)
-  );
-  const hasAllAddressFields = addressFields.every((field) =>
-    providedFields.includes(field)
-  );
-
-  if (hasAnyAddressField && !hasAllAddressFields) {
-    throw new Error(
-      `If any address fields are provided, all of them must be included: ${addressFields.join(', ')}.`
+      `Some fields missing, please check again`
     );
   }
 

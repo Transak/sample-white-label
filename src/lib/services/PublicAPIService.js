@@ -8,7 +8,7 @@ class PublicAPIService {
     return this.client.request({
       endpointId: 'quote',
       data: null,
-      params: { ...params, partnerApiKey: this.partnerApiKey },
+      params: { ...params, apiKey: this.partnerApiKey },
     });
   }
 

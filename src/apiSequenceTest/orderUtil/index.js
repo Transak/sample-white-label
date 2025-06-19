@@ -5,11 +5,10 @@ import Pusher from 'pusher-js';
  * ✅ Generates a random ID for partner order tracking
  */
 function generateRandomId() {
-  return Math.random().toString(36).substring(2, 15) + 
+  return Math.random().toString(36).substring(2, 15) +
          Math.random().toString(36).substring(2, 15);
 }
 
-let quoteId, orderId, formData;
 
 /**
  * ✅ Main Order API Sequence Test
@@ -19,24 +18,18 @@ async function orderApiSequenceTests(transak) {
 
   // ✅ 1. Fetch Quote
   const quoteData = await transak.public.getQuote(sampleData.quoteFields);
-  if (quoteData && quoteData.quoteId) quoteId = quoteData.quoteId;
+  let quoteId = quoteData.quoteId;
   console.log(`✅ Quote fetched: ${quoteId}`);
 
   // ✅ 2. Fetch KYC Forms & Check if KYC is Required
-  const requiresKYC = await checkKYCStatus(transak, quoteId);
-  if (requiresKYC) {
+  const kycResponse = await checkKYCStatus(transak);
+  if (!kycResponse.isRequired) {
     console.log('⚠️ KYC Required! Running KYC Checks...');
     await kycApiSequenceTests(transak);
   }
 
   // ✅ 3. Check Order Limits
-  await checkOrderLimits(transak);
-
-  // ✅ Reserve Wallet
-  const walletReserveData = await transak.order.walletReserve({
-    quoteId,
-    walletAddress: sampleData.walletAddress,
-  });
+  await checkUserLimits(transak, kycResponse.kycType);
 
   // ✅ Create Order
   let orderDetails;
@@ -47,33 +40,33 @@ async function orderApiSequenceTests(transak) {
     // ✅ Confirm Payment
     await confirmPayment(transak, orderDetails.orderId);
   }
-  
+
   // ✅ Poll Order Status Until Completion
   await waitForOrderCompletion(transak, orderDetails.orderId, orderDetails.partnerOrderId);
 }
 
 /**
- * ✅ Fetches KYC Forms to Check If KYC is Required
+ * ✅ Fetches KYC Status using getUser() API
  */
-async function checkKYCStatus(transak, quoteId) {
-  console.log('🔄 Checking KYC Forms...');
-  const res = await transak.user.getKycForms({ quoteId });
-  formData = res;
-  const forms = res.forms;
-  console.log('✅ KYC Forms Fetched.');
-  return forms.length > 0; // If forms exist, KYC is required
+async function checkKYCStatus(transak) {
+  const response = await transak.user.getUser();
+  return {
+    isRequired: response.kyc?.status === 'APPROVED',
+    kycType: response.kyc?.type
+  };
 }
 
 /**
  * ✅ Checks Order Limits Before Placing Order
  */
-async function checkOrderLimits(transak) {
-  console.log('🔄 Checking Order Limits...');
+async function checkUserLimits(transak, kycType) {
+  console.log('🔄 Checking User Limits...');
 
-  const res = await transak.order.getOrderLimit({
-    kycType: formData.kycType,
+  const res = await transak.order.getUserLimits({
+    kycType: kycType,
     isBuyOrSell: sampleData.quoteFields.isBuyOrSell,
     fiatCurrency: sampleData.quoteFields.fiatCurrency,
+    paymentCategory: sampleData.paymentCategory,
   });
 
   const remainingLimits = res.remaining;
@@ -138,10 +131,10 @@ async function createSemiWidgetPaymentUrl(transak) {
   console.log('Requesting OTT...');
   const ottResponse = await transak.user.requestOtt();
   console.log('✅ OTT retrieved successfully.');
-  
+
   const partnerOrderId = generateRandomId();
   const cardPaymentUrl = generateCardPaymentUrl({
-    ott: ottResponse.token,
+    ott: ottResponse.ott,
     apiKey: sampleData.env.PARTNER_API_KEY,
     environment: sampleData.env.ENVIRONMENT,
     fiatCurrency: sampleData.quoteFields.fiatCurrency,
@@ -155,7 +148,7 @@ async function createSemiWidgetPaymentUrl(transak) {
   });
 
   console.log(`Complete card payment order using the following link: ${cardPaymentUrl}`);
-  
+
   // For card payments, we'll use partnerOrderId as the orderId for tracking
   return {
     orderId: null,
@@ -165,15 +158,17 @@ async function createSemiWidgetPaymentUrl(transak) {
 }
 
 /**
- * ✅ Creates a bank transfer order and returns order details
+ * ✅ Creates a bank transfer order and return order details
  * @returns {Promise<{orderId: string, partnerOrderId: string, paymentDetails: Object}>}
  */
 async function createBankTransferOrder(transak, quoteId) {
   console.log('🔄 Creating Order...');
 
-  const orderData = await transak.order.createOrder({ quoteId });
+  const paymentMethod = sampleData.quoteFields.paymentMethod;
+  const walletAddress = sampleData.walletAddress;
+  const orderData = await transak.order.createOrder({ quoteId, paymentMethod, walletAddress });
 
-  console.log(`✅ Order Created: ${orderData.id}`);
+  console.log(`✅ Order Created: ${orderData.orderId}`);
   console.log(`🔗 Wallet Address: ${orderData.walletAddress}`);
   console.log(
     `💰 Fiat Amount: ${orderData.fiatAmount} ${orderData.fiatCurrency}`
@@ -184,11 +179,10 @@ async function createBankTransferOrder(transak, quoteId) {
   console.log(`📍 Order Status: ${orderData.status}`);
 
   // ✅ Extract and log bank details
-  const paymentOptions = orderData?.paymentOptions;
-  if (paymentOptions && paymentOptions.length > 0) {
+  const paymentDetails = orderData?.paymentDetails[0];
+  if (paymentDetails && paymentDetails.fields.length > 0) {
     console.log('🏦 **Bank Transfer Details:**');
-    const paymentOption = paymentOptions[0];
-    paymentOption.fields.forEach((field) => {
+    paymentDetails.fields.forEach((field) => {
       console.log(`   - ${field.name}: ${field.value}`);
     });
   } else {
@@ -196,7 +190,7 @@ async function createBankTransferOrder(transak, quoteId) {
   }
 
   return {
-    orderId: orderData.id,
+    orderId: orderData.orderId,
     partnerOrderId: null,
     paymentUrl: null
   };
@@ -207,17 +201,29 @@ async function createBankTransferOrder(transak, quoteId) {
  */
 async function confirmPayment(transak, orderId) {
   console.log('🔄 Confirming Payment...');
-  const res = await transak.order.confirmPayment({
+  await transak.order.confirmPayment({
     orderId,
     paymentMethod: sampleData.quoteFields.paymentMethod,
   });
   console.log('✅ Payment Marked as Paid.');
 }
 
-async function getOrderById(transak, orderId, isSkipTest) {
-  const res = await transak.order.getOrderById({ orderId });
-  // if(!isSkipTest) await executeApiTest(apiData, res);
-  return res;
+/**
+ * ✅ Function to fetch an order using orderId
+ */
+async function getOrderById(transak, orderId) {
+  return await transak.order.getOrderById({ orderId });
+}
+
+/**
+ * ✅ Function to cancel an order using orderId
+ */
+async function cancelOrder(transak, orderId, cancelReason = 'User Cancelled') {
+  console.log('🔄 Cancelling order with ID:', orderId);
+  return await transak.order.cancelOrder({
+    orderId,
+    cancelReason
+  });
 }
 
 /**
@@ -275,7 +281,7 @@ async function handleBankTransferOrderCompletion(transak, orderId) {
   while (retries < maxRetries) {
     await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 30 seconds
 
-    const orderData = await getOrderById(transak, orderId, retries > 0);
+    const orderData = await getOrderById(transak, orderId);
     const orderStatus = orderData.status;
     console.log(
       `🔄 Order Status: ${orderStatus} (Retry ${retries + 1}/${maxRetries})`
