@@ -174,239 +174,143 @@ const apiSpecs = {
     response_optional_fields: user_response_fields.optional,
     output_fields: userOutputFields,
   },
-  get_kyc_forms: {
-    name: 'Get KYC Forms',
-    id: 'get_kyc_forms',
-    url: '/api/v2/user/kyc/get-forms',
+  get_kyc_requirement: {
+    name: 'Get KYC Requirement',
+    id: 'get_kyc_requirement',
+    url: '/api/v2/kyc/requirement',
     method: 'GET',
     headers: {
       'x-trace-id': 'string',
-      authorization: 'string',
+      Authorization: 'string',
     },
     query_params: {
-      onlyFormIds: { type: 'boolean', isRequired: 'true', value: 'true' },
       'metadata[quoteId]': { type: 'string', isRequired: 'true', value: '' },
-      'metadata[formType]': {
-        type: 'string',
-        isRequired: 'true',
-        value: 'KYC',
-      },
+      apiKey: { type: 'string', isRequired: 'true', value: '' },
     },
     expected_status: 200,
-    response_root_field_name: 'response',
+    response_root_field_name: 'data',
     response_required_fields: {
-      forms: {
-        type: 'array',
-        isRequired: 'true',
-        items: {
-          id: { type: 'string', isRequired: 'true' },
-          active: { type: 'boolean', isRequired: 'false' },
-          hideProgress: { type: 'boolean', isRequired: 'false' },
-          onSubmit: { type: 'string', isRequired: 'false' },
-        },
-      },
-      onboardingSessionId: { type: 'string', isRequired: 'true' },
+      status: { type: 'string', isRequired: 'true' },
       kycType: { type: 'string', isRequired: 'true' },
-      kycFlowType: { type: 'string', isRequired: 'true' },
-      isAllowedToDoKyc: { type: 'boolean', isRequired: 'true' },
       isAllowedToPlaceOrder: { type: 'boolean', isRequired: 'true' },
     },
     response_optional_fields: {},
-    isSaveTheResponseInMemory: false,
     output_fields: {
       kycType: { source: 'kycType', type: 'string', isRequired: 'true' },
-      forms: { source: 'forms', type: 'array', isRequired: 'true' },
+      status: { source: 'status', type: 'string', isRequired: 'true' },
+      isAllowedToPlaceOrder: { source: 'isAllowedToPlaceOrder', type: 'boolean', isRequired: 'true' },
     },
   },
-  get_kyc_forms_by_id: {
-    name: 'Fetch Individual KYC Form',
-    id: 'get_kyc_forms_by_id',
-    url: '/api/v2/user/kyc/get-forms',
-    method: 'GET',
-    headers: {
-      'x-trace-id': 'string',
-      authorization: 'string',
-    },
-    query_params: {
-      onlyFormIds: { type: 'boolean', isRequired: 'true', value: 'false' },
-      'formIds[]': { type: 'string', isRequired: 'true', value: '' },
-      'metadata[quoteId]': { type: 'string', isRequired: 'true', value: '' },
-      'metadata[formType]': {
-        type: 'string',
-        isRequired: 'true',
-        value: 'KYC',
-      },
-    },
-    expected_status: 200,
-    response_root_field_name: 'response',
-    response_required_fields: {
-      formId: 'string',
-      formName: 'string',
-      endpoint: {
-        path: 'string',
-        method: 'string',
-      },
-      fields: [
-        {
-          id: 'string',
-          name: 'string',
-          type: 'string',
-          isRequired: 'boolean',
-          regex: 'string',
-          regexErrorMessage: 'string',
-          placeholder: 'string',
-          value: 'value',
-        },
-      ],
-    },
-    response_optional_fields: {},
-    output_fields: {
-      formId: { source: 'formId', type: 'string', isRequired: 'true' },
-      formName: { source: 'formName', type: 'string', isRequired: 'true' },
-      endpoint: {
-        source: 'endpoint',
-        type: 'object',
-        isRequired: true,
-        nestedFields: {
-          path: { source: 'path', type: 'string', isRequired: 'true' },
-          method: { source: 'method', type: 'string', isRequired: 'true' },
-        },
-      },
-      fields: {
-        source: 'fields',
-        type: 'array',
-        isRequired: 'true',
-        nestedFields: {
-          id: { source: 'id', type: 'string', isRequired: true },
-          name: { source: 'name', type: 'string', isRequired: true },
-          type: { source: 'type', type: 'string', isRequired: true },
-          isRequired: {
-            source: 'isRequired',
-            type: 'boolean',
-            isRequired: true,
-          },
-          regex: { source: 'regex', type: 'string', isRequired: false },
-          placeholder: {
-            source: 'placeholder',
-            type: 'string',
-            isRequired: false,
-          },
-          value: { source: 'value', type: 'string', isRequired: false },
-        },
-      },
-    },
-  },
-  get_kyc_forms_idProof: {
-    name: 'Fetch ID Proof KYC Form',
-    id: 'get_kyc_forms_idProof',
-    url: '/api/v2/user/kyc/get-forms',
-    method: 'GET',
-    headers: {
-      'x-trace-id': 'string',
-      authorization: 'string',
-    },
-    query_params: {
-      onlyFormIds: { type: 'boolean', isRequired: 'true', value: 'false' },
-      'formIds[]': { type: 'string', isRequired: 'true', value: '' },
-      'metadata[quoteId]': { type: 'string', isRequired: 'true', value: '' },
-      'metadata[formType]': {
-        type: 'string',
-        isRequired: 'true',
-        value: 'KYC',
-      },
-    },
-    expected_status: 200,
-    response_root_field_name: 'response',
-    response_required_fields: {
-      formId: 'string',
-      formName: 'string',
-      id: 'string',
-      type: 'string',
-      data: {
-        sdkToken: 'string',
-        workFlowRunId: 'string',
-        expiresAt: 'string',
-        kycUrl: 'string',
-      },
-    },
-    response_optional_fields: {},
-    output_fields: {
-      formId: { source: 'formId', type: 'string', isRequired: true },
-      formName: { source: 'formName', type: 'string', isRequired: true },
-      kycUrl: { source: 'data.kycUrl', type: 'string', isRequired: true },
-      expiresAt: { source: 'data.expiresAt', type: 'string', isRequired: true },
-    },
-  },
-  patch_user: {
-    name: 'Patch User',
-    id: 'patch_user',
-    url: '/api/v2/user',
-
+  patch_user_details: {
+    name: 'Patch User Details',
+    id: 'patch_user_details',
+    url: '/api/v2/kyc/user',
     method: 'PATCH',
     headers: {
       'x-trace-id': 'string',
-      authorization: 'string',
+      Authorization: 'string',
       'content-type': 'application/json',
     },
     body: {
-      //address fields
-      addressLine1: { type: 'string', isRequired: 'false' },
-      addressLine2: { type: 'string', isRequired: 'false' },
-      state: { type: 'string', isRequired: 'false' },
-      city: { type: 'string', isRequired: 'false' },
-      postCode: { type: 'string', isRequired: 'false' },
-      countryCode: { type: 'string', isRequired: 'false' },
-      //personal details fields
-      firstName: { type: 'string', isRequired: 'false', value: '' },
-      lastName: { type: 'string', isRequired: 'false', value: '' },
-      mobileNumber: { type: 'string', isRequired: 'false', value: '' },
-      dob: { type: 'string', isRequired: 'false', value: '' },
+      addressDetails: {
+        source: 'addressDetails',
+        type: 'object',
+        isRequired: true,
+        nestedFields: {
+          addressLine1: { type: 'string', isRequired: 'false' },
+          addressLine2: { type: 'string', isRequired: 'false' },
+          state: { type: 'string', isRequired: 'false' },
+          city: { type: 'string', isRequired: 'false' },
+          postCode: { type: 'string', isRequired: 'false' },
+          countryCode: { type: 'string', isRequired: 'false' },
+        }
+      },
+      personalDetails: {
+        source: 'personalDetails',
+        type: 'object',
+        isRequired: true,
+        nestedFields: {
+          firstName: { type: 'string', isRequired: 'false', value: '' },
+          lastName: { type: 'string', isRequired: 'false', value: '' },
+          mobileNumber: { type: 'string', isRequired: 'false', value: '' },
+          dob: { type: 'string', isRequired: 'false', value: '' },
+        }
+      }
     },
     expected_status: 200,
-    response_root_field_name: 'response',
+    response_root_field_name: 'data',
     response_required_fields: user_response_fields.required,
     response_optional_fields: user_response_fields.optional,
     output_fields: userOutputFields,
   },
-  submit_purpose_of_usage: {
-    name: 'Submit Purpose Of Usage',
-    id: 'submit_purpose_of_usage',
-    url: '/api/v2/user/purpose-of-usage',
+  get_additional_requirements: {
+    name: 'Get Additional Requirements',
+    id: 'get_additional_requirements',
+    url: '/api/v2/kyc/additional-requirements',
+    method: 'GET',
+    headers: {
+      'x-trace-id': 'string',
+      Authorization: 'string',
+    },
+    query_params: {
+      'metadata[quoteId]': {type: 'string', isRequired: 'true', value: ''}
+    },
+    expected_status: 200,
+    response_root_field_name: 'data',
+    response_required_fields: {
+      formsRequired: {
+        type: 'array',
+        isRequired: 'true',
+        items: {
+          type: { type: 'string', isRequired: 'true'},
+        }
+      },
+      response_optional_fields: {},
+      output_fields: {
+        formsRequired: {source: 'formsRequired', type: 'array', isRequired: 'true'},
+      }
+    }
+  },
+  update_purpose_of_usage: {
+    name: 'Update Purpose Of Usage',
+    id: 'update_purpose_of_usage',
+    url: '/api/v2/kyc/purpose-of-usage',
     method: 'POST',
     headers: {
       'x-trace-id': 'string',
-      authorization: 'string',
+      Authorization: 'string',
       'content-type': 'application/json',
     },
     body: {
       purposeList: { type: 'array', isRequired: 'true', value: [] },
     },
     expected_status: 200,
-    response_root_field_name: 'result',
+    response_root_field_name: 'data',
     response_required_fields: {
-      result: 'ok',
+        status: 'SUBMITTED',
     },
     response_optional_fields: {},
     output_fields: {},
   },
-  share_token_status: {
-    name: 'Share Token Status',
-    id: 'share_token_status',
-    url: '/api/v2/user/share-token-status',
-    method: 'GET',
+  submit_ssn: {
+    name: 'Submit SSN',
+    id: 'submit_ssn',
+    url: '/api/v2/kyc/ssn',
+    method: 'POST',
     headers: {
       'x-trace-id': 'string',
-      authorization: 'string',
-      'content-type': 'application/json',
+      Authorization: 'string',
+      'Content-Type': 'application/json',
     },
-    query_params: {
-      kycShareToken: { type: 'string', isRequired: 'true', value: '' },
-      kycShareTokenProvider: { type: 'string', isRequired: 'false', value: '' },
+    body: {
+      ssn: { type: 'string', isRequired: 'true', value: '' },
       quoteId: { type: 'string', isRequired: 'true', value: '' },
     },
     expected_status: 200,
-    response_root_field_name: 'response',
-    response_required_fields: {},
+    response_root_field_name: 'data',
+    response_required_fields: {
+      status: 'SUBMITTED',
+    },
     response_optional_fields: {},
     output_fields: {},
   },
@@ -432,28 +336,7 @@ const apiSpecs = {
     output_fields: {
       ott: { source: 'ott', type: 'string', isRequired: true },
     },
-  },
-  verify_ssn: {
-    name: 'Verify SSN',
-    id: 'verify_ssn',
-    url: '/api/v2/user/verify-ssn',
-    method: 'POST',
-    headers: {
-      'x-trace-id': 'string',
-      'Authorization': 'string',
-      'Content-Type': 'application/json',
-    },
-    body: {
-      ssn: { type: 'string', isRequired: 'true', value: '' },
-    },
-    expected_status: 200,
-    response_root_field_name: 'result',
-    response_required_fields: {
-      result: 'ok',
-    },
-    response_optional_fields: {},
-    output_fields: {},
-  },
+  }
 };
 
 //default export module nodejs

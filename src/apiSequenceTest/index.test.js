@@ -84,11 +84,11 @@ describe('Authentication API Tests', function () {
     await handleKYCVerificationViaApi(transak);
   });
 
-  // it('should handle order placement', async function () {
-  //   if (!transak.client.accessToken)
-  //     throw new Error(
-  //       '❌ Access Token is missing. Run email verification apiSequenceTest first.'
-  //     );
-  //     await orderApiSequenceTests(transak);
-  // });
+  it('should handle order placement', async function () {
+    if (!transak.client.accessToken)
+      throw new Error(
+        '❌ Access Token is missing. Run email verification apiSequenceTest first.'
+      );
+      await orderApiSequenceTests(transak);
+  });
 });

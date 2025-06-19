@@ -97,7 +97,6 @@ const apiSpecs = {
     name: `Get Quote`,
     id: 'quote',
     url: '/api/v2/lookup/quotes',
-
     method: 'GET',
     headers: {
       'x-trace-id': 'string',
@@ -113,7 +112,6 @@ const apiSpecs = {
       quoteCountryCode: { type: 'string', isRequired: 'true', value: '' },
       kycShareToken: { type: 'string', isRequired: 'false', value: '' },
       kycShareTokenProvider: { type: 'string', isRequired: 'false', value: '' },
-      partnerApiKey: { type: 'string', isRequired: 'true', value: '' },
     },
     expected_status: 200,
     response_root_field_name: 'data',

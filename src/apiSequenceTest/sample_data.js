@@ -2,7 +2,7 @@ export const sampleData = {
   "env":{
     "PARTNER_API_KEY": "0b4a8ff3-0d7e-409b-a6b9-3b82094b0f03",
     "ACCESS_TOKEN": "",
-    "EMAIL": "anshul.garg@transak.com",
+    "EMAIL": "anshul.garg+testapi1@transak.com",
     "OTP_CODE": "3651",
     "ENVIRONMENT": "staging",
     "WIDGET_DOMAIN_STAGING": "https://global-stg.transak.com",
@@ -25,13 +25,13 @@ export const sampleData = {
     "cryptoCurrency": "USDC",
     "paymentMethod": "credit_debit_card", // credit_debit_card, apple_pay, google_pay, sepa_bank_transfer, pm_ach_push, pm_wire
     "isBuyOrSell": "BUY",
-    "fiatAmount": 1000,
-    "partnerApiKey": "string",
+    "fiatAmount": 30,
     "network": "arbitrum",
     "quoteCountryCode": "FR"
   },
-  "walletAddress": "0x3D629A50ec20eb9a2ed23D0fd0EB28DdcA9Fda46",
-  "address": {
+  "paymentCategory": "bank_transfer",
+  "walletAddress": "0xE99B71B9a035102432e30F47843746e646737b79",
+  "addressDetails": {
     "addressLine1": "101 Rue",
     "addressLine2": "Saint-Pierre",
     "state": "Calvados",
@@ -42,13 +42,7 @@ export const sampleData = {
   "purposeOfUsage": {
     "purposeList": ["Buying/selling crypto for investments"]
   },
-  "idProof": {},
-  "usSSN": () => {
-    // Generate a random SSN in the format 000-00-0000
-    const area = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    const group = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-    const serial = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    const ssn = `${area}-${group}-${serial}`;
-    return { ssn }
-  }
+  "usSSN": {
+    "ssn": "123-45-6789"
+  },
 }
