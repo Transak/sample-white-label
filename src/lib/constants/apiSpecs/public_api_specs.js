@@ -110,6 +110,7 @@ const apiSpecs = {
       apiKey: { type: 'string', isRequired: 'true', value: '' },
       network: { type: 'string', isRequired: 'true', value: '' },
       quoteCountryCode: { type: 'string', isRequired: 'true', value: '' },
+      partnerCustomerId: { type: 'string', isRequired: 'true', value: '' },
       kycShareToken: { type: 'string', isRequired: 'false', value: '' },
       kycShareTokenProvider: { type: 'string', isRequired: 'false', value: '' },
     },
@@ -158,5 +159,5 @@ const apiSpecs = {
     },
   },
 };
-//default export module nodejs
+
 export default apiSpecs;

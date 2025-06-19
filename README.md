@@ -178,7 +178,8 @@ Thus, `getQuote` plays a **vital role** in the **entire order flow**, from **KYC
     "fiatAmount": 30,
     "apiKey": "string",
     "network": "arbitrum",
-    "quoteCountryCode": "FR"
+    "quoteCountryCode": "FR",
+    "partnerCustomerId": "12345"
   });
 ```
 

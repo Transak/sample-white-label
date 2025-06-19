@@ -23,11 +23,12 @@ export const sampleData = {
   "quoteFields": {
     "fiatCurrency": "EUR",
     "cryptoCurrency": "USDC",
-    "paymentMethod": "credit_debit_card", // credit_debit_card, apple_pay, google_pay, sepa_bank_transfer, pm_ach_push, pm_wire
+    "paymentMethod": "sepa_bank_transfer", // credit_debit_card, apple_pay, google_pay, sepa_bank_transfer, pm_ach_push, pm_wire
     "isBuyOrSell": "BUY",
     "fiatAmount": 30,
     "network": "arbitrum",
-    "quoteCountryCode": "FR"
+    "quoteCountryCode": "FR",
+    "partnerCustomerId": "1234567890"
   },
   "paymentCategory": "bank_transfer",
   "walletAddress": "0xE99B71B9a035102432e30F47843746e646737b79",
