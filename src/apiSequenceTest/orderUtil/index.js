@@ -180,13 +180,19 @@ async function createBankTransferOrder(transak, quoteId) {
 
   // ✅ Extract and log bank details
   const paymentDetails = orderData?.paymentDetails[0];
-  if (paymentDetails && paymentDetails.fields.length > 0) {
-    console.log('🏦 **Bank Transfer Details:**');
-    paymentDetails.fields.forEach((field) => {
-      console.log(`   - ${field.name}: ${field.value}`);
-    });
+  if(isOpenBankingFlow(paymentDetails?.paymentMethod)) {
+    console.log('🏦 **--Open Banking--**');
+    console.log('🔗 Please complete payment on the link below');
+    console.log(paymentDetails?.redirectUrl);
   } else {
-    console.warn('⚠️ No bank details found in the response.');
+    if (paymentDetails && paymentDetails.fields.length > 0) {
+      console.log('🏦 **Bank Transfer Details:**');
+      paymentDetails.fields.forEach((field) => {
+        console.log(`   - ${field.name}: ${field.value}`);
+      });
+    } else {
+      console.warn('⚠️ No bank details found in the response.');
+    }
   }
 
   return {
@@ -233,6 +239,15 @@ async function cancelOrder(transak, orderId, cancelReason = 'User Cancelled') {
  */
 function isSemiWidgetFlow(paymentMethod) {
   return ['credit_debit_card', 'apple_pay', 'google_pay'].includes(paymentMethod);
+}
+
+/**
+ * ✅ Checks if the payment method is open banking payment
+ * @param {string} paymentMethod - The payment method to check
+ * @returns {boolean} - True if it's a card-based payment
+ */
+function isOpenBankingFlow(paymentMethod) {
+  return ['pm_open_banking'].includes(paymentMethod);
 }
 
 
