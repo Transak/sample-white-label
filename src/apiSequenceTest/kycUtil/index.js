@@ -29,11 +29,19 @@ async function kycApiSequenceTests(transak) {
   // ✅ Fetch Quote for KYC
   await fetchQuote(transak);
 
-  // ✅ Fetch & Submit KYC Forms (Excluding `purposeOfUsage` and `idProof`)
-  await fetchAndSubmitKYCDetails(transak, quoteId);
+  if (sampleData.env.IS_KYC_THOUGH_RELIANCE) {
 
-  //✅ Wait for KYC Approval
-  await pollForKYCApproval(transak);
+    //✅ Wait for KYC via Reliance Approval
+    await pollForKYCRelianceStatus(transak, quoteId, sampleData.kycRelianceDetails.kycShareToken);
+
+  } else {
+    // ✅ Fetch & Submit KYC Forms (Excluding `purposeOfUsage` and `idProof`)
+    await fetchAndSubmitKYCDetails(transak, quoteId);
+
+    //✅ Wait for KYC Approval
+    await pollForKYCApproval(transak);
+  }
+
 }
 
 /**
@@ -49,7 +57,7 @@ async function fetchQuote(transak) {
                 {
                   kycShareToken: sampleData.kycRelianceDetails.kycShareToken,
                   kycShareTokenProvider: sampleData.kycRelianceDetails.kycShareTokenProvider,
-                  partnerApiKey: transak.client.config.partnerApiKey
+                  apiKey: transak.client.config.partnerApiKey
                 } :
                 {}
         )
@@ -164,17 +172,19 @@ async function pollForKYCApproval(transak) {
 }
 
 /**
- * ✅ Polls `GET /api/v2/user/shareTokenStatus` every 10 seconds until KYC is approved
+ * ✅ Polls `GET /api/v2/user/share-token-status` every 10 seconds until KYC is approved
  */
-async function waitForkycShareTokenToReachTerminalState(transak, kycShareToken, kycShareTokenProvider, quoteId) {
+async function pollForKYCRelianceStatus(transak, quoteId, kycShareToken) {
+  console.log(`🔄 KYC Share Token processing Starting..`);
+
   const maxRetries = 20; // 20 retries max
   let retries = 0;
 
   while (retries < maxRetries) {
     await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
 
-    const {shareTokenStatus} = await transak.user.shareTokenStatus({kycShareToken, kycShareTokenProvider, quoteId});
-    if (shareTokenStatus === 'DONE' || shareTokenStatus === 'FAILED') {
+    const {shareTokenStatus} = await transak.user.getKycRelianceStatus({quoteId, kycShareToken});
+    if (shareTokenStatus === 'DONE' || shareTokenStatus === 'IMPORTED' || shareTokenStatus === 'FAILED') {
       console.log(`✅ KYC Share Token Processing complete. Share Token Status: ${shareTokenStatus}`);
       return shareTokenStatus;
     }
