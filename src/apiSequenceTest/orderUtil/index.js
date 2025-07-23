@@ -22,8 +22,8 @@ async function orderApiSequenceTests(transak) {
   console.log(`✅ Quote fetched: ${quoteId}`);
 
   // ✅ 2. Fetch KYC Forms & Check if KYC is Required
-  const kycResponse = await checkKYCStatus(transak);
-  if (!kycResponse.isRequired) {
+  const kycResponse = await checkKYCStatus(transak, quoteId);
+  if (kycResponse.isRequired) {
     console.log('⚠️ KYC Required! Running KYC Checks...');
     await kycApiSequenceTests(transak);
   }
@@ -38,7 +38,9 @@ async function orderApiSequenceTests(transak) {
   } else {
     orderDetails = await createBankTransferOrder(transak, quoteId);
     // ✅ Confirm Payment
-    await confirmPayment(transak, orderDetails.orderId);
+    const confirm = await confirmPayment(transak, orderDetails.orderId);
+    console.log(confirm);
+
   }
 
   // ✅ Poll Order Status Until Completion
@@ -46,13 +48,13 @@ async function orderApiSequenceTests(transak) {
 }
 
 /**
- * ✅ Fetches KYC Status using getUser() API
+ * ✅ Fetches KYC Status using getKYCRequirement API
  */
-async function checkKYCStatus(transak) {
-  const response = await transak.user.getUser();
+async function checkKYCStatus(transak, quoteId) {
+  const response = await transak.user.getKYCRequirement({ quoteId });
   return {
-    isRequired: response.kyc?.status === 'APPROVED',
-    kycType: response.kyc?.type
+    isRequired: response.status !== 'APPROVED',
+    kycType: response.kycType
   };
 }
 
@@ -180,6 +182,7 @@ async function createBankTransferOrder(transak, quoteId) {
 
   // ✅ Extract and log bank details
   const paymentDetails = orderData?.paymentDetails[0];
+  console.log(paymentDetails);
   if(isOpenBankingFlow(paymentDetails?.paymentMethod)) {
     console.log('🏦 **--Open Banking--**');
     console.log('🔗 Please complete payment on the link below');
@@ -207,11 +210,12 @@ async function createBankTransferOrder(transak, quoteId) {
  */
 async function confirmPayment(transak, orderId) {
   console.log('🔄 Confirming Payment...');
-  await transak.order.confirmPayment({
+  console.log('✅ Payment Marked as Paid.');
+  return await transak.order.confirmPayment({
     orderId,
     paymentMethod: sampleData.quoteFields.paymentMethod,
   });
-  console.log('✅ Payment Marked as Paid.');
+
 }
 
 /**
