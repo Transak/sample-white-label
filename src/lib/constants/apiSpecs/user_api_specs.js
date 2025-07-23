@@ -253,7 +253,8 @@ const apiSpecs = {
       Authorization: 'string',
     },
     query_params: {
-      'metadata[quoteId]': {type: 'string', isRequired: 'true', value: ''}
+      'metadata[quoteId]': {type: 'string', isRequired: 'true', value: ''},
+      'apiKey': {type: 'string', isRequired: 'true', value: ''}
     },
     expected_status: 200,
     response_root_field_name: 'data',

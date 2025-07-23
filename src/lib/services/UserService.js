@@ -81,6 +81,7 @@ class UserService {
       data: {},
       params: {
         'metadata[quoteId]': quoteId,
+        apiKey: this.partnerApiKey
       },
       headers: { 'Authorization': `${this.client.accessToken}` },
     });
